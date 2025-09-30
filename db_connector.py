@@ -1,8 +1,9 @@
 """
 A script connecting to the Deutsche Bahn API via the requests library.
 
-Retrieving location data for train stations within Germany. 
+Retrieving location data for train stations within Germany.
 """
+
 import json
 import os
 import requests
@@ -22,5 +23,28 @@ headers = {
 
 response = requests.get(url, headers=headers, params=querystring)
 
-with open('all_stations.json', 'w') as f:
-    json.dump(response.json(), f)
+response = response.json()
+
+final_station_data = []
+for station in response["result"]:
+    print(station["name"])
+    final_station_data.append(
+        {
+            "name": station["name"],
+            "address": f'{station["mailingAddress"]["street"]}, {station["mailingAddress"]["zipcode"]} {station["mailingAddress"]["city"]}',
+            "lat": (
+                station["evaNumbers"][0]["geographicCoordinates"]["coordinates"][1]
+                if len(station["evaNumbers"]) > 0
+                else None
+            ),
+            "lon": (
+                station["evaNumbers"][0]["geographicCoordinates"]["coordinates"][0]
+                if len(station["evaNumbers"]) > 0
+                else None
+            ),
+        }
+    )
+
+
+with open("all_stations.json", "w") as f:
+    json.dump(final_station_data, f)

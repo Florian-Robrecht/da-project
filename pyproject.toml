@@ -7,8 +7,11 @@ requires-python = ">=3.13"
 dependencies = [
     "folium>=0.20.0",
     "geopy>=2.4.1",
+    "pandas>=2.3.3",
+    "pydeck>=0.9.1",
     "python-dotenv>=1.1.1",
     "requests>=2.32.5",
     "streamlit>=1.50.0",
     "streamlit-folium>=0.25.2",
+    "watchdog>=6.0.0",
 ]
