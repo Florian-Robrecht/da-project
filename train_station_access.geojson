@@ -1,0 +1,35 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "travel_time": "<10min",
+        "color": "green"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [8.0, 51.0], [10.0, 51.0], [10.0, 52.0], [8.0, 52.0], [8.0, 51.0]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "travel_time": "10-20min",
+        "color": "orange"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [10.0, 51.0], [12.0, 51.0], [12.0, 52.0], [10.0, 52.0], [10.0, 51.0]
+          ]
+        ]
+      }
+    }
+  ]
+}
