@@ -115,7 +115,7 @@ def main():
             get_icon="icon_data",
             get_position="[lon, lat]",
             size_units="meters",  # Set the size unit to meters
-            get_size=750,        # Each icon will represent a 1000-meter (1 km) space
+            get_size=750, # Each icon will represent a 750-meter space
             size_scale=1,      
             pickable=True,
         )
@@ -132,7 +132,7 @@ def main():
             # Update map view to center on the new address
             st.session_state.view_state.latitude = coords[0]
             st.session_state.view_state.longitude = coords[1]
-            st.session_state.view_state.zoom = 12
+            st.session_state.view_state.zoom = 10
 
             # Create a DataFrame for the user's location marker
             user_location_df = pd.DataFrame(
@@ -154,7 +154,7 @@ def main():
             "ScatterplotLayer",
             data=user_location_df,
             get_position="[lon, lat]",
-            get_color="[200, 30, 0, 160]",  # Red-orange color
+            get_color="[128, 0, 128, 255]",  # Red-orange color
             get_radius=100,  # Radius in meters
             pickable=True,
             radius_min_pixels=5,
@@ -162,7 +162,7 @@ def main():
         layers.append(user_layer)
 
     # --- RENDER MAP ---
-    # Configure tooltip to show station/location details on hover
+    # Configure tooltip to show station details on hover
     tooltip = {
         "html": "<b>{name}</b><br/>{address}",
         "style": {
@@ -184,7 +184,7 @@ def main():
             api_keys={"mapbox": mapbox_api_key},
         ),
         use_container_width=True,
-        height=1000,
+        height=700,
     )
 
 
