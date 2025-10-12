@@ -9,18 +9,22 @@ import streamlit as st
 import pydeck as pdk
 import pandas as pd
 import json
+from datetime import datetime
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 
 # --- CONFIGURATION ---
 CONFIG = {
-    "STATIONS_JSON_PATH": "all_stations.json",
-    "APP_TITLE": "🚄 Train Station Accessibility in Germany",
+    "STATIONS_JSON_PATH": "ev_stations.json",
+    "APP_TITLE": "🔋🚗🇩🇪 Public EV Charging Stations in Germany",
     "INITIAL_MAP_LOCATION": [51.1657, 10.4515],
     "INITIAL_MAP_ZOOM": 5,
     "MAPBOX_STYLE": "mapbox://styles/mapbox/light-v9",
-    "DB_ICON_URL": "https://cdn.prod.website-files.com/672b9491a2b3a49f453f8338/68dbebf8274a54aae784d3dd_db_logo.png",
+    "EV_CHARGER_ICON_URL": "https://cdn.prod.website-files.com/672b9491a2b3a49f453f8338/68eb959c10a234c6efe509fd_1.png",
+    "EV_CHARGER_DATASET_PUBLICATION": datetime(2025, 8, 26),
 }
+ref_year = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].year
+ref_month = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].month
 
 # --- HELPER FUNCTIONS ---
 
@@ -36,7 +40,7 @@ def load_and_prepare_data(path: str) -> pd.DataFrame | None:
         df = pd.DataFrame(data)
         # Define the icon data once
         icon_data = {
-            "url": CONFIG["DB_ICON_URL"],
+            "url": CONFIG["EV_CHARGER_ICON_URL"],
             "width": 128,
             "height": 128,
             "anchorY": 128,
@@ -53,18 +57,6 @@ def load_and_prepare_data(path: str) -> pd.DataFrame | None:
     except (json.JSONDecodeError, KeyError) as e:
         st.error(f"Error processing the data file: {e}")
         return None
-
-
-#@st.cache_data
-#def load_grid_data(path: str) -> pd.DataFrame | None:
-#    """Loads the pre-computed grid data from a JSON file."""
-#    try:
-#        df = pd.read_json(path)
-#        return df
-#    except FileNotFoundError:
-#        st.error(f"Error: The grid data file '{path}' was not found.")
-#        st.info("Please run the `generate_grid.py` script first to create it.")
-#        return None
 
 
 def geocode_address(address: str) -> tuple[float, float] | None:
@@ -92,22 +84,70 @@ def main():
     st.title(CONFIG["APP_TITLE"])
 
     st.markdown(
-        """
-        This map shows train station locations and estimates walking accessibility in Germany. 
-        The colored overlay represents the air-distance to the nearest station:
-        - **Green**: < 1 km
-        - **Yellow**: 1 - 2.5 km
-        - **Red**: > 2.5 km
+        f"""
+        This website shows the progress of the transition to EVs in Germany - updated on {CONFIG["EV_CHARGER_DATASET_PUBLICATION"].strftime('%Y-%m-%d')}.
         """
     )
-
     # --- LOAD DATA ---
-    station_df = load_and_prepare_data(CONFIG["STATIONS_JSON_PATH"])
-    #grid_df = load_grid_data("reachability_grid.json")
+    ev_station_df = load_and_prepare_data(CONFIG["STATIONS_JSON_PATH"])
+    ev_station_df["Inbetriebnahmedatum"] = pd.to_datetime(
+        ev_station_df["Inbetriebnahmedatum"], format="%d.%m.%Y"
+    )
+    ev_registrations_df = pd.read_csv("ev_registrations_cleaned.csv")
+
+    # --- CREATE INFO CARDS ---
+    # column1: EV Stations, column2: Registered EVs
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        try:
+            num_chargers = ev_station_df["Anzahl Ladepunkte"].sum()
+            # EV_CHARGER_DATASET_PUBLICATION - 1 year
+            one_year_ago = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].replace(
+                year=CONFIG["EV_CHARGER_DATASET_PUBLICATION"].year - 1
+            )
+            num_chargers_one_year_ago = ev_station_df[
+                ev_station_df["Inbetriebnahmedatum"] <= one_year_ago
+            ]["Anzahl Ladepunkte"].sum()
+            st.metric(
+                label="🔋 Public EV Chargers in Germany",
+                value=f"{num_chargers:,}",
+                delta=f"{round(((num_chargers/num_chargers_one_year_ago)-1)*100,2)}% YoY",
+            )
+        except (FileNotFoundError, ValueError):
+            st.metric("🔋 Public EV Chargers in Germany", "Data not available")
+    with col2:
+        try:
+            registered_evs = ev_registrations_df["Count"].sum()
+            registered_evs_one_year_ago = ev_registrations_df[
+                (
+                    (ev_registrations_df["Year"] < ref_year - 1)
+                    | (
+                        (ev_registrations_df["Year"] == ref_year - 1)
+                        & (ev_registrations_df["Month"] <= ref_month)
+                    )
+                )
+            ]["Count"].sum()
+            st.metric(
+                label="🚗 Registered EVs",
+                value=f"{registered_evs:,}",
+                delta=f"{round(((registered_evs/registered_evs_one_year_ago)-1)*100,2)}% YoY",
+            )
+        except (FileNotFoundError, pd.errors.ParserError):
+            st.metric("🚗 Registered EVs", "Data not available")
+    with col3:
+        try:
+            st.metric(
+                label="🔌 Registered EVs per public charger",
+                value=round(registered_evs / num_chargers, 2),
+                delta=f"{round(((registered_evs/num_chargers)/(registered_evs_one_year_ago/num_chargers_one_year_ago)-1)*100,2)}% YoY",
+            )
+        except (FileNotFoundError, pd.errors.ParserError):
+            st.metric("📍 Charging Stations", "Data not available")
+
     # --- USER INPUT ---
     address_input = st.text_input(
         "Enter a German address to locate on the map:",
-        placeholder="e.g., Brandenburger Tor, Berlin",
+        placeholder="Adickesallee 32",
     )
 
     # --- INITIALIZE MAP STATE ---
@@ -124,10 +164,10 @@ def main():
     layers = []
 
     # --- CREATE STATION LAYER ---
-    if station_df is not None and not station_df.empty:
+    if ev_station_df is not None and not ev_station_df.empty:
         station_layer = pdk.Layer(
             "IconLayer",
-            data=station_df,
+            data=ev_station_df,
             get_icon="icon_data",
             get_position="[lon, lat]",
             size_units="meters",  # Set the size unit to meters
@@ -178,9 +218,9 @@ def main():
         layers.append(user_layer)
 
     # --- RENDER MAP ---
-    # Configure tooltip to show station details on hover
+    # Configure tooltip to show EV station details on hover
     tooltip = {
-        "html": "<b>{name}</b><br/>{address}",
+        "html": "<b>{Betreiber}</b><br/>{Nennleistung Ladeeinrichtung [kW]}kW </b><br/> Chargers: {Anzahl Ladepunkte}",
         "style": {
             "backgroundColor": "steelblue",
             "color": "white",

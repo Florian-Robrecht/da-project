@@ -1,0 +1,1694 @@
+[
+    {
+        "datum": "Januar 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 140,
+        "time": 1388530800
+    },
+    {
+        "datum": "Januar 2014",
+        "model": "Reine Elektroautos",
+        "count": 541,
+        "time": 1388530800
+    },
+    {
+        "datum": "Februar 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 125,
+        "time": 1391209200
+    },
+    {
+        "datum": "Februar 2014",
+        "model": "Reine Elektroautos",
+        "count": 481,
+        "time": 1391209200
+    },
+    {
+        "datum": "M\u00e4rz 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 156,
+        "time": 1393628400
+    },
+    {
+        "datum": "M\u00e4rz 2014",
+        "model": "Reine Elektroautos",
+        "count": 823,
+        "time": 1393628400
+    },
+    {
+        "datum": "April 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 302,
+        "time": 1396303200
+    },
+    {
+        "datum": "April 2014",
+        "model": "Reine Elektroautos",
+        "count": 599,
+        "time": 1396303200
+    },
+    {
+        "datum": "Mai 2014",
+        "model": "Reine Elektroautos",
+        "count": 934,
+        "time": 1398895200
+    },
+    {
+        "datum": "Mai 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 535,
+        "time": 1398895200
+    },
+    {
+        "datum": "Juni 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 317,
+        "time": 1401573600
+    },
+    {
+        "datum": "Juni 2014",
+        "model": "Reine Elektroautos",
+        "count": 810,
+        "time": 1401573600
+    },
+    {
+        "datum": "Juli 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 460,
+        "time": 1404165600
+    },
+    {
+        "datum": "Juli 2014",
+        "model": "Reine Elektroautos",
+        "count": 597,
+        "time": 1404165600
+    },
+    {
+        "datum": "August 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 620,
+        "time": 1406844000
+    },
+    {
+        "datum": "August 2014",
+        "model": "Reine Elektroautos",
+        "count": 515,
+        "time": 1406844000
+    },
+    {
+        "datum": "September 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 398,
+        "time": 1409522400
+    },
+    {
+        "datum": "September 2014",
+        "model": "Reine Elektroautos",
+        "count": 747,
+        "time": 1409522400
+    },
+    {
+        "datum": "Oktober 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 402,
+        "time": 1412114400
+    },
+    {
+        "datum": "Oktober 2014",
+        "model": "Reine Elektroautos",
+        "count": 841,
+        "time": 1412114400
+    },
+    {
+        "datum": "November 2014",
+        "model": "Reine Elektroautos",
+        "count": 630,
+        "time": 1414796400
+    },
+    {
+        "datum": "November 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 514,
+        "time": 1414796400
+    },
+    {
+        "datum": "Dezember 2014",
+        "model": "Plug-In Hybridautos",
+        "count": 558,
+        "time": 1417388400
+    },
+    {
+        "datum": "Dezember 2014",
+        "model": "Reine Elektroautos",
+        "count": 1004,
+        "time": 1417388400
+    },
+    {
+        "datum": "Januar 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 593,
+        "time": 1420066800
+    },
+    {
+        "datum": "Januar 2015",
+        "model": "Reine Elektroautos",
+        "count": 659,
+        "time": 1420066800
+    },
+    {
+        "datum": "Februar 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 686,
+        "time": 1422745200
+    },
+    {
+        "datum": "Februar 2015",
+        "model": "Reine Elektroautos",
+        "count": 436,
+        "time": 1422745200
+    },
+    {
+        "datum": "M\u00e4rz 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 886,
+        "time": 1425164400
+    },
+    {
+        "datum": "M\u00e4rz 2015",
+        "model": "Reine Elektroautos",
+        "count": 1278,
+        "time": 1425164400
+    },
+    {
+        "datum": "April 2015",
+        "model": "Reine Elektroautos",
+        "count": 684,
+        "time": 1427839200
+    },
+    {
+        "datum": "April 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 1006,
+        "time": 1427839200
+    },
+    {
+        "datum": "Mai 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 1054,
+        "time": 1430431200
+    },
+    {
+        "datum": "Mai 2015",
+        "model": "Reine Elektroautos",
+        "count": 574,
+        "time": 1430431200
+    },
+    {
+        "datum": "Juni 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 754,
+        "time": 1433109600
+    },
+    {
+        "datum": "Juni 2015",
+        "model": "Reine Elektroautos",
+        "count": 1032,
+        "time": 1433109600
+    },
+    {
+        "datum": "Juli 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 944,
+        "time": 1435701600
+    },
+    {
+        "datum": "Juli 2015",
+        "model": "Reine Elektroautos",
+        "count": 962,
+        "time": 1435701600
+    },
+    {
+        "datum": "August 2015",
+        "model": "Reine Elektroautos",
+        "count": 831,
+        "time": 1438380000
+    },
+    {
+        "datum": "August 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 570,
+        "time": 1438380000
+    },
+    {
+        "datum": "September 2015",
+        "model": "Reine Elektroautos",
+        "count": 929,
+        "time": 1441058400
+    },
+    {
+        "datum": "September 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 1038,
+        "time": 1441058400
+    },
+    {
+        "datum": "Oktober 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 1031,
+        "time": 1443650400
+    },
+    {
+        "datum": "Oktober 2015",
+        "model": "Reine Elektroautos",
+        "count": 1686,
+        "time": 1443650400
+    },
+    {
+        "datum": "November 2015",
+        "model": "Reine Elektroautos",
+        "count": 1372,
+        "time": 1446332400
+    },
+    {
+        "datum": "November 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 1823,
+        "time": 1446332400
+    },
+    {
+        "datum": "Dezember 2015",
+        "model": "Plug-In Hybridautos",
+        "count": 1256,
+        "time": 1448924400
+    },
+    {
+        "datum": "Dezember 2015",
+        "model": "Reine Elektroautos",
+        "count": 1920,
+        "time": 1448924400
+    },
+    {
+        "datum": "Januar 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 976,
+        "time": 1451602800
+    },
+    {
+        "datum": "Januar 2016",
+        "model": "Reine Elektroautos",
+        "count": 477,
+        "time": 1451602800
+    },
+    {
+        "datum": "Februar 2016",
+        "model": "Reine Elektroautos",
+        "count": 751,
+        "time": 1454281200
+    },
+    {
+        "datum": "Februar 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 1237,
+        "time": 1454281200
+    },
+    {
+        "datum": "M\u00e4rz 2016",
+        "model": "Reine Elektroautos",
+        "count": 1104,
+        "time": 1456786800
+    },
+    {
+        "datum": "M\u00e4rz 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 1290,
+        "time": 1456786800
+    },
+    {
+        "datum": "April 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 964,
+        "time": 1459461600
+    },
+    {
+        "datum": "April 2016",
+        "model": "Reine Elektroautos",
+        "count": 604,
+        "time": 1459461600
+    },
+    {
+        "datum": "Mai 2016",
+        "model": "Reine Elektroautos",
+        "count": 588,
+        "time": 1462053600
+    },
+    {
+        "datum": "Mai 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 792,
+        "time": 1462053600
+    },
+    {
+        "datum": "Juni 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 865,
+        "time": 1464732000
+    },
+    {
+        "datum": "Juni 2016",
+        "model": "Reine Elektroautos",
+        "count": 833,
+        "time": 1464732000
+    },
+    {
+        "datum": "Juli 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 1016,
+        "time": 1467324000
+    },
+    {
+        "datum": "Juli 2016",
+        "model": "Reine Elektroautos",
+        "count": 785,
+        "time": 1467324000
+    },
+    {
+        "datum": "August 2016",
+        "model": "Reine Elektroautos",
+        "count": 895,
+        "time": 1470002400
+    },
+    {
+        "datum": "August 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 836,
+        "time": 1470002400
+    },
+    {
+        "datum": "September 2016",
+        "model": "Reine Elektroautos",
+        "count": 1641,
+        "time": 1472680800
+    },
+    {
+        "datum": "September 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 1420,
+        "time": 1472680800
+    },
+    {
+        "datum": "Oktober 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 1449,
+        "time": 1475272800
+    },
+    {
+        "datum": "Oktober 2016",
+        "model": "Reine Elektroautos",
+        "count": 1167,
+        "time": 1475272800
+    },
+    {
+        "datum": "November 2016",
+        "model": "Reine Elektroautos",
+        "count": 1231,
+        "time": 1477954800
+    },
+    {
+        "datum": "November 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 1418,
+        "time": 1477954800
+    },
+    {
+        "datum": "Dezember 2016",
+        "model": "Plug-In Hybridautos",
+        "count": 1481,
+        "time": 1480546800
+    },
+    {
+        "datum": "Dezember 2016",
+        "model": "Reine Elektroautos",
+        "count": 1334,
+        "time": 1480546800
+    },
+    {
+        "datum": "Januar 2017",
+        "model": "Reine Elektroautos",
+        "count": 1323,
+        "time": 1483225200
+    },
+    {
+        "datum": "Januar 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 1533,
+        "time": 1483225200
+    },
+    {
+        "datum": "Februar 2017",
+        "model": "Reine Elektroautos",
+        "count": 1546,
+        "time": 1485903600
+    },
+    {
+        "datum": "Februar 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 1443,
+        "time": 1485903600
+    },
+    {
+        "datum": "M\u00e4rz 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 2288,
+        "time": 1488322800
+    },
+    {
+        "datum": "M\u00e4rz 2017",
+        "model": "Reine Elektroautos",
+        "count": 2191,
+        "time": 1488322800
+    },
+    {
+        "datum": "April 2017",
+        "model": "Reine Elektroautos",
+        "count": 1413,
+        "time": 1490997600
+    },
+    {
+        "datum": "April 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 2174,
+        "time": 1490997600
+    },
+    {
+        "datum": "Mai 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 2323,
+        "time": 1493589600
+    },
+    {
+        "datum": "Mai 2017",
+        "model": "Reine Elektroautos",
+        "count": 1520,
+        "time": 1493589600
+    },
+    {
+        "datum": "Juni 2017",
+        "model": "Reine Elektroautos",
+        "count": 2196,
+        "time": 1496268000
+    },
+    {
+        "datum": "Juni 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 2503,
+        "time": 1496268000
+    },
+    {
+        "datum": "Juli 2017",
+        "model": "Reine Elektroautos",
+        "count": 1820,
+        "time": 1498860000
+    },
+    {
+        "datum": "Juli 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 2417,
+        "time": 1498860000
+    },
+    {
+        "datum": "August 2017",
+        "model": "Reine Elektroautos",
+        "count": 2177,
+        "time": 1501538400
+    },
+    {
+        "datum": "August 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 2617,
+        "time": 1501538400
+    },
+    {
+        "datum": "September 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 3118,
+        "time": 1504216800
+    },
+    {
+        "datum": "September 2017",
+        "model": "Reine Elektroautos",
+        "count": 2247,
+        "time": 1504216800
+    },
+    {
+        "datum": "Oktober 2017",
+        "model": "Reine Elektroautos",
+        "count": 2180,
+        "time": 1506808800
+    },
+    {
+        "datum": "Oktober 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 2885,
+        "time": 1506808800
+    },
+    {
+        "datum": "November 2017",
+        "model": "Reine Elektroautos",
+        "count": 3031,
+        "time": 1509490800
+    },
+    {
+        "datum": "November 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 3259,
+        "time": 1509490800
+    },
+    {
+        "datum": "Dezember 2017",
+        "model": "Plug-In Hybridautos",
+        "count": 2876,
+        "time": 1512082800
+    },
+    {
+        "datum": "Dezember 2017",
+        "model": "Reine Elektroautos",
+        "count": 3412,
+        "time": 1512082800
+    },
+    {
+        "datum": "Januar 2018",
+        "model": "Reine Elektroautos",
+        "count": 2764,
+        "time": 1514761200
+    },
+    {
+        "datum": "Januar 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 2870,
+        "time": 1514761200
+    },
+    {
+        "datum": "Februar 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 2559,
+        "time": 1517439600
+    },
+    {
+        "datum": "Februar 2018",
+        "model": "Reine Elektroautos",
+        "count": 2546,
+        "time": 1517439600
+    },
+    {
+        "datum": "M\u00e4rz 2018",
+        "model": "Reine Elektroautos",
+        "count": 3792,
+        "time": 1519858800
+    },
+    {
+        "datum": "M\u00e4rz 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 3018,
+        "time": 1519858800
+    },
+    {
+        "datum": "April 2018",
+        "model": "Reine Elektroautos",
+        "count": 3171,
+        "time": 1522533600
+    },
+    {
+        "datum": "April 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 2632,
+        "time": 1522533600
+    },
+    {
+        "datum": "Mai 2018",
+        "model": "Reine Elektroautos",
+        "count": 2310,
+        "time": 1525125600
+    },
+    {
+        "datum": "Mai 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 2465,
+        "time": 1525125600
+    },
+    {
+        "datum": "Juni 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 3139,
+        "time": 1527804000
+    },
+    {
+        "datum": "Juni 2018",
+        "model": "Reine Elektroautos",
+        "count": 2651,
+        "time": 1527804000
+    },
+    {
+        "datum": "Juli 2018",
+        "model": "Reine Elektroautos",
+        "count": 2526,
+        "time": 1530396000
+    },
+    {
+        "datum": "Juli 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 3091,
+        "time": 1530396000
+    },
+    {
+        "datum": "August 2018",
+        "model": "Reine Elektroautos",
+        "count": 2457,
+        "time": 1533074400
+    },
+    {
+        "datum": "August 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 3431,
+        "time": 1533074400
+    },
+    {
+        "datum": "September 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 2362,
+        "time": 1535752800
+    },
+    {
+        "datum": "September 2018",
+        "model": "Reine Elektroautos",
+        "count": 2357,
+        "time": 1535752800
+    },
+    {
+        "datum": "Oktober 2018",
+        "model": "Reine Elektroautos",
+        "count": 3390,
+        "time": 1538344800
+    },
+    {
+        "datum": "Oktober 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 1998,
+        "time": 1538344800
+    },
+    {
+        "datum": "November 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 2004,
+        "time": 1541026800
+    },
+    {
+        "datum": "November 2018",
+        "model": "Reine Elektroautos",
+        "count": 4262,
+        "time": 1541026800
+    },
+    {
+        "datum": "Dezember 2018",
+        "model": "Reine Elektroautos",
+        "count": 3836,
+        "time": 1543618800
+    },
+    {
+        "datum": "Dezember 2018",
+        "model": "Plug-In Hybridautos",
+        "count": 1873,
+        "time": 1543618800
+    },
+    {
+        "datum": "Januar 2019",
+        "model": "Reine Elektroautos",
+        "count": 4648,
+        "time": 1546297200
+    },
+    {
+        "datum": "Januar 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 2119,
+        "time": 1546297200
+    },
+    {
+        "datum": "Februar 2019",
+        "model": "Reine Elektroautos",
+        "count": 4637,
+        "time": 1548975600
+    },
+    {
+        "datum": "Februar 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 2202,
+        "time": 1548975600
+    },
+    {
+        "datum": "M\u00e4rz 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 3061,
+        "time": 1551394800
+    },
+    {
+        "datum": "M\u00e4rz 2019",
+        "model": "Reine Elektroautos",
+        "count": 6616,
+        "time": 1551394800
+    },
+    {
+        "datum": "April 2019",
+        "model": "Reine Elektroautos",
+        "count": 4768,
+        "time": 1554069600
+    },
+    {
+        "datum": "April 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 3003,
+        "time": 1554069600
+    },
+    {
+        "datum": "Mai 2019",
+        "model": "Reine Elektroautos",
+        "count": 4630,
+        "time": 1556661600
+    },
+    {
+        "datum": "Mai 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 3269,
+        "time": 1556661600
+    },
+    {
+        "datum": "Juni 2019",
+        "model": "Reine Elektroautos",
+        "count": 5760,
+        "time": 1559340000
+    },
+    {
+        "datum": "Juni 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 2871,
+        "time": 1559340000
+    },
+    {
+        "datum": "Juli 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 3270,
+        "time": 1561932000
+    },
+    {
+        "datum": "Juli 2019",
+        "model": "Reine Elektroautos",
+        "count": 5963,
+        "time": 1561932000
+    },
+    {
+        "datum": "August 2019",
+        "model": "Reine Elektroautos",
+        "count": 5001,
+        "time": 1564610400
+    },
+    {
+        "datum": "August 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 3120,
+        "time": 1564610400
+    },
+    {
+        "datum": "September 2019",
+        "model": "Reine Elektroautos",
+        "count": 5880,
+        "time": 1567288800
+    },
+    {
+        "datum": "September 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 3572,
+        "time": 1567288800
+    },
+    {
+        "datum": "Oktober 2019",
+        "model": "Reine Elektroautos",
+        "count": 4979,
+        "time": 1569880800
+    },
+    {
+        "datum": "Oktober 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 6947,
+        "time": 1569880800
+    },
+    {
+        "datum": "November 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 6334,
+        "time": 1572562800
+    },
+    {
+        "datum": "November 2019",
+        "model": "Reine Elektroautos",
+        "count": 4651,
+        "time": 1572562800
+    },
+    {
+        "datum": "Dezember 2019",
+        "model": "Reine Elektroautos",
+        "count": 5748,
+        "time": 1575154800
+    },
+    {
+        "datum": "Dezember 2019",
+        "model": "Plug-In Hybridautos",
+        "count": 5580,
+        "time": 1575154800
+    },
+    {
+        "datum": "Januar 2020",
+        "model": "Reine Elektroautos",
+        "count": 7492,
+        "time": 1577833200
+    },
+    {
+        "datum": "Januar 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 8639,
+        "time": 1577833200
+    },
+    {
+        "datum": "Februar 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 8354,
+        "time": 1580511600
+    },
+    {
+        "datum": "Februar 2020",
+        "model": "Reine Elektroautos",
+        "count": 8154,
+        "time": 1580511600
+    },
+    {
+        "datum": "M\u00e4rz 2020",
+        "model": "Reine Elektroautos",
+        "count": 10329,
+        "time": 1583017200
+    },
+    {
+        "datum": "M\u00e4rz 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 9426,
+        "time": 1583017200
+    },
+    {
+        "datum": "April 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 5618,
+        "time": 1585692000
+    },
+    {
+        "datum": "April 2020",
+        "model": "Reine Elektroautos",
+        "count": 4635,
+        "time": 1585692000
+    },
+    {
+        "datum": "Mai 2020",
+        "model": "Reine Elektroautos",
+        "count": 5578,
+        "time": 1588284000
+    },
+    {
+        "datum": "Mai 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 6755,
+        "time": 1588284000
+    },
+    {
+        "datum": "Juni 2020",
+        "model": "Reine Elektroautos",
+        "count": 8119,
+        "time": 1590962400
+    },
+    {
+        "datum": "Juni 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 10749,
+        "time": 1590962400
+    },
+    {
+        "datum": "Juli 2020",
+        "model": "Reine Elektroautos",
+        "count": 16798,
+        "time": 1593554400
+    },
+    {
+        "datum": "Juli 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 19119,
+        "time": 1593554400
+    },
+    {
+        "datum": "August 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 17095,
+        "time": 1596232800
+    },
+    {
+        "datum": "August 2020",
+        "model": "Reine Elektroautos",
+        "count": 16076,
+        "time": 1596232800
+    },
+    {
+        "datum": "September 2020",
+        "model": "Reine Elektroautos",
+        "count": 21188,
+        "time": 1598911200
+    },
+    {
+        "datum": "September 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 20127,
+        "time": 1598911200
+    },
+    {
+        "datum": "Oktober 2020",
+        "model": "Reine Elektroautos",
+        "count": 23158,
+        "time": 1601503200
+    },
+    {
+        "datum": "Oktober 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 24859,
+        "time": 1601503200
+    },
+    {
+        "datum": "November 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 30621,
+        "time": 1604185200
+    },
+    {
+        "datum": "November 2020",
+        "model": "Reine Elektroautos",
+        "count": 28965,
+        "time": 1604185200
+    },
+    {
+        "datum": "Dezember 2020",
+        "model": "Reine Elektroautos",
+        "count": 43671,
+        "time": 1606777200
+    },
+    {
+        "datum": "Dezember 2020",
+        "model": "Plug-In Hybridautos",
+        "count": 39107,
+        "time": 1606777200
+    },
+    {
+        "datum": "Januar 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 20588,
+        "time": 1609455600
+    },
+    {
+        "datum": "Januar 2021",
+        "model": "Reine Elektroautos",
+        "count": 16315,
+        "time": 1609455600
+    },
+    {
+        "datum": "Februar 2021",
+        "model": "Reine Elektroautos",
+        "count": 18278,
+        "time": 1612134000
+    },
+    {
+        "datum": "Februar 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 21879,
+        "time": 1612134000
+    },
+    {
+        "datum": "M\u00e4rz 2021",
+        "model": "Reine Elektroautos",
+        "count": 30101,
+        "time": 1614553200
+    },
+    {
+        "datum": "M\u00e4rz 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 35580,
+        "time": 1614553200
+    },
+    {
+        "datum": "April 2021",
+        "model": "Reine Elektroautos",
+        "count": 23816,
+        "time": 1617228000
+    },
+    {
+        "datum": "April 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 26988,
+        "time": 1617228000
+    },
+    {
+        "datum": "Mai 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 27222,
+        "time": 1619820000
+    },
+    {
+        "datum": "Mai 2021",
+        "model": "Reine Elektroautos",
+        "count": 26786,
+        "time": 1619820000
+    },
+    {
+        "datum": "Juni 2021",
+        "model": "Reine Elektroautos",
+        "count": 33420,
+        "time": 1622498400
+    },
+    {
+        "datum": "Juni 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 31314,
+        "time": 1622498400
+    },
+    {
+        "datum": "Juli 2021",
+        "model": "Reine Elektroautos",
+        "count": 25464,
+        "time": 1625090400
+    },
+    {
+        "datum": "Juli 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 30154,
+        "time": 1625090400
+    },
+    {
+        "datum": "August 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 24497,
+        "time": 1627768800
+    },
+    {
+        "datum": "August 2021",
+        "model": "Reine Elektroautos",
+        "count": 28860,
+        "time": 1627768800
+    },
+    {
+        "datum": "September 2021",
+        "model": "Reine Elektroautos",
+        "count": 33655,
+        "time": 1630447200
+    },
+    {
+        "datum": "September 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 22842,
+        "time": 1630447200
+    },
+    {
+        "datum": "Oktober 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 23734,
+        "time": 1633039200
+    },
+    {
+        "datum": "Oktober 2021",
+        "model": "Reine Elektroautos",
+        "count": 30560,
+        "time": 1633039200
+    },
+    {
+        "datum": "November 2021",
+        "model": "Reine Elektroautos",
+        "count": 40270,
+        "time": 1635721200
+    },
+    {
+        "datum": "November 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 27899,
+        "time": 1635721200
+    },
+    {
+        "datum": "Dezember 2021",
+        "model": "Reine Elektroautos",
+        "count": 48436,
+        "time": 1638313200
+    },
+    {
+        "datum": "Dezember 2021",
+        "model": "Plug-In Hybridautos",
+        "count": 32752,
+        "time": 1638313200
+    },
+    {
+        "datum": "Januar 2022",
+        "model": "Reine Elektroautos",
+        "count": 20892,
+        "time": 1640991600
+    },
+    {
+        "datum": "Januar 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 18900,
+        "time": 1640991600
+    },
+    {
+        "datum": "Februar 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 21583,
+        "time": 1643670000
+    },
+    {
+        "datum": "Februar 2022",
+        "model": "Reine Elektroautos",
+        "count": 28306,
+        "time": 1643670000
+    },
+    {
+        "datum": "M\u00e4rz 2022",
+        "model": "Reine Elektroautos",
+        "count": 34474,
+        "time": 1646089200
+    },
+    {
+        "datum": "M\u00e4rz 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 27288,
+        "time": 1646089200
+    },
+    {
+        "datum": "April 2022",
+        "model": "Reine Elektroautos",
+        "count": 22175,
+        "time": 1648764000
+    },
+    {
+        "datum": "April 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 21697,
+        "time": 1648764000
+    },
+    {
+        "datum": "Mai 2022",
+        "model": "Reine Elektroautos",
+        "count": 29215,
+        "time": 1651356000
+    },
+    {
+        "datum": "Mai 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 23206,
+        "time": 1651356000
+    },
+    {
+        "datum": "Juni 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 26203,
+        "time": 1654034400
+    },
+    {
+        "datum": "Juni 2022",
+        "model": "Reine Elektroautos",
+        "count": 32234,
+        "time": 1654034400
+    },
+    {
+        "datum": "Juli 2022",
+        "model": "Reine Elektroautos",
+        "count": 28815,
+        "time": 1656626400
+    },
+    {
+        "datum": "Juli 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 23712,
+        "time": 1656626400
+    },
+    {
+        "datum": "August 2022",
+        "model": "Reine Elektroautos",
+        "count": 32006,
+        "time": 1659304800
+    },
+    {
+        "datum": "August 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 24719,
+        "time": 1659304800
+    },
+    {
+        "datum": "September 2022",
+        "model": "Reine Elektroautos",
+        "count": 44389,
+        "time": 1661983200
+    },
+    {
+        "datum": "September 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 28336,
+        "time": 1661983200
+    },
+    {
+        "datum": "Oktober 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 32064,
+        "time": 1664575200
+    },
+    {
+        "datum": "Oktober 2022",
+        "model": "Reine Elektroautos",
+        "count": 35781,
+        "time": 1664575200
+    },
+    {
+        "datum": "November 2022",
+        "model": "Reine Elektroautos",
+        "count": 57980,
+        "time": 1667257200
+    },
+    {
+        "datum": "November 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 44581,
+        "time": 1667257200
+    },
+    {
+        "datum": "Dezember 2022",
+        "model": "Reine Elektroautos",
+        "count": 104292,
+        "time": 1669849200
+    },
+    {
+        "datum": "Dezember 2022",
+        "model": "Plug-In Hybridautos",
+        "count": 69804,
+        "time": 1669849200
+    },
+    {
+        "datum": "Januar 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 8853,
+        "time": 1672527600
+    },
+    {
+        "datum": "Januar 2023",
+        "model": "Reine Elektroautos",
+        "count": 18136,
+        "time": 1672527600
+    },
+    {
+        "datum": "Februar 2023",
+        "model": "Reine Elektroautos",
+        "count": 32475,
+        "time": 1675206000
+    },
+    {
+        "datum": "Februar 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 11916,
+        "time": 1675206000
+    },
+    {
+        "datum": "M\u00e4rz 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 16776,
+        "time": 1677625200
+    },
+    {
+        "datum": "M\u00e4rz 2023",
+        "model": "Reine Elektroautos",
+        "count": 44125,
+        "time": 1677625200
+    },
+    {
+        "datum": "April 2023",
+        "model": "Reine Elektroautos",
+        "count": 29740,
+        "time": 1680300000
+    },
+    {
+        "datum": "April 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 11787,
+        "time": 1680300000
+    },
+    {
+        "datum": "Mai 2023",
+        "model": "Reine Elektroautos",
+        "count": 42725,
+        "time": 1682892000
+    },
+    {
+        "datum": "Mai 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 13830,
+        "time": 1682892000
+    },
+    {
+        "datum": "Juni 2023",
+        "model": "Reine Elektroautos",
+        "count": 52988,
+        "time": 1685570400
+    },
+    {
+        "datum": "Juni 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 15930,
+        "time": 1685570400
+    },
+    {
+        "datum": "Juli 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 14345,
+        "time": 1688162400
+    },
+    {
+        "datum": "Juli 2023",
+        "model": "Reine Elektroautos",
+        "count": 48682,
+        "time": 1688162400
+    },
+    {
+        "datum": "August 2023",
+        "model": "Reine Elektroautos",
+        "count": 86649,
+        "time": 1690840800
+    },
+    {
+        "datum": "August 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 14552,
+        "time": 1690840800
+    },
+    {
+        "datum": "September 2023",
+        "model": "Reine Elektroautos",
+        "count": 31714,
+        "time": 1693519200
+    },
+    {
+        "datum": "September 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 15383,
+        "time": 1693519200
+    },
+    {
+        "datum": "Oktober 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 16361,
+        "time": 1696111200
+    },
+    {
+        "datum": "Oktober 2023",
+        "model": "Reine Elektroautos",
+        "count": 37334,
+        "time": 1696111200
+    },
+    {
+        "datum": "November 2023",
+        "model": "Reine Elektroautos",
+        "count": 44942,
+        "time": 1698793200
+    },
+    {
+        "datum": "November 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 18124,
+        "time": 1698793200
+    },
+    {
+        "datum": "Dezember 2023",
+        "model": "Plug-In Hybridautos",
+        "count": 17894,
+        "time": 1701385200
+    },
+    {
+        "datum": "Dezember 2023",
+        "model": "Reine Elektroautos",
+        "count": 54654,
+        "time": 1701385200
+    },
+    {
+        "datum": "Januar 2024",
+        "model": "Reine Elektroautos",
+        "count": 22474,
+        "time": 1704063600
+    },
+    {
+        "datum": "Januar 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 14394,
+        "time": 1704063600
+    },
+    {
+        "datum": "Februar 2024",
+        "model": "Reine Elektroautos",
+        "count": 27479,
+        "time": 1706742000
+    },
+    {
+        "datum": "Februar 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 14575,
+        "time": 1706742000
+    },
+    {
+        "datum": "M\u00e4rz 2024",
+        "model": "Reine Elektroautos",
+        "count": 31497,
+        "time": 1709247600
+    },
+    {
+        "datum": "M\u00e4rz 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 16094,
+        "time": 1709247600
+    },
+    {
+        "datum": "April 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 15135,
+        "time": 1711922400
+    },
+    {
+        "datum": "April 2024",
+        "model": "Reine Elektroautos",
+        "count": 29668,
+        "time": 1711922400
+    },
+    {
+        "datum": "Mai 2024",
+        "model": "Reine Elektroautos",
+        "count": 29708,
+        "time": 1714514400
+    },
+    {
+        "datum": "Mai 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 14038,
+        "time": 1714514400
+    },
+    {
+        "datum": "Juni 2024",
+        "model": "Reine Elektroautos",
+        "count": 43412,
+        "time": 1717192800
+    },
+    {
+        "datum": "Juni 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 15391,
+        "time": 1717192800
+    },
+    {
+        "datum": "Juli 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 14811,
+        "time": 1719784800
+    },
+    {
+        "datum": "Juli 2024",
+        "model": "Reine Elektroautos",
+        "count": 30762,
+        "time": 1719784800
+    },
+    {
+        "datum": "August 2024",
+        "model": "Reine Elektroautos",
+        "count": 27024,
+        "time": 1722463200
+    },
+    {
+        "datum": "August 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 13565,
+        "time": 1722463200
+    },
+    {
+        "datum": "September 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 14936,
+        "time": 1725141600
+    },
+    {
+        "datum": "September 2024",
+        "model": "Reine Elektroautos",
+        "count": 34479,
+        "time": 1725141600
+    },
+    {
+        "datum": "Oktober 2024",
+        "model": "Reine Elektroautos",
+        "count": 35491,
+        "time": 1727733600
+    },
+    {
+        "datum": "Oktober 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 19337,
+        "time": 1727733600
+    },
+    {
+        "datum": "November 2024",
+        "model": "Reine Elektroautos",
+        "count": 35167,
+        "time": 1730415600
+    },
+    {
+        "datum": "November 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 20604,
+        "time": 1730415600
+    },
+    {
+        "datum": "Dezember 2024",
+        "model": "Reine Elektroautos",
+        "count": 33448,
+        "time": 1733007600
+    },
+    {
+        "datum": "Dezember 2024",
+        "model": "Plug-In Hybridautos",
+        "count": 19025,
+        "time": 1733007600
+    },
+    {
+        "datum": "Januar 2025",
+        "model": "Plug-In Hybridautos",
+        "count": 17712,
+        "time": 1735686000
+    },
+    {
+        "datum": "Januar 2025",
+        "model": "Reine Elektroautos",
+        "count": 34498,
+        "time": 1735686000
+    },
+    {
+        "datum": "Februar 2025",
+        "model": "Reine Elektroautos",
+        "count": 35949,
+        "time": 1738364400
+    },
+    {
+        "datum": "Februar 2025",
+        "model": "Plug-In Hybridautos",
+        "count": 19534,
+        "time": 1738364400
+    },
+    {
+        "datum": "M\u00e4rz 2025",
+        "model": "Reine Elektroautos",
+        "count": 42521,
+        "time": 1740783600
+    },
+    {
+        "datum": "M\u00e4rz 2025",
+        "model": "Plug-In Hybridautos",
+        "count": 26553,
+        "time": 1740783600
+    },
+    {
+        "datum": "April 2025",
+        "model": "Reine Elektroautos",
+        "count": 45535,
+        "time": 1743458400
+    },
+    {
+        "datum": "April 2025",
+        "model": "Plug-In Hybridautos",
+        "count": 24317,
+        "time": 1743458400
+    },
+    {
+        "datum": "Mai 2025",
+        "model": "Plug-In Hybridautos",
+        "count": 25181,
+        "time": 1746050400
+    },
+    {
+        "datum": "Mai 2025",
+        "model": "Reine Elektroautos",
+        "count": 43060,
+        "time": 1746050400
+    },
+    {
+        "datum": "Juni 2025",
+        "model": "Reine Elektroautos",
+        "count": 47163,
+        "time": 1748728800
+    },
+    {
+        "datum": "Juni 2025",
+        "model": "Plug-In Hybridautos",
+        "count": 25608,
+        "time": 1748728800
+    },
+    {
+        "datum": "Juli 2025",
+        "model": "Reine Elektroautos",
+        "count": 48614,
+        "time": 1751320800
+    },
+    {
+        "datum": "Juli 2025",
+        "model": "Plug-In Hybridautos",
+        "count": 27197,
+        "time": 1751320800
+    },
+    {
+        "datum": "August 2025",
+        "model": "Reine Elektroautos",
+        "count": 39367,
+        "time": 1753999200
+    },
+    {
+        "datum": "August 2025",
+        "model": "Plug-In Hybridautos",
+        "count": 23973,
+        "time": 1753999200
+    },
+    {
+        "datum": "September 2025",
+        "model": "Reine Elektroautos",
+        "count": 45495,
+        "time": 1756677600
+    },
+    {
+        "datum": "September 2025",
+        "model": "Plug-In Hybridautos",
+        "count": 27685,
+        "time": 1756677600
+    }
+]
