@@ -29,8 +29,6 @@ REF_YEAR = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].year
 REF_MONTH = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].month
 
 # --- HELPER FUNCTIONS ---
-
-
 @st.cache_data
 def load_and_prepare_data(path: str) -> pd.DataFrame | None:
     """Loads EV charging station data and prepares it for Pydeck."""
@@ -146,7 +144,7 @@ def main():
                 )
             ]["Count"].sum()
             st.metric(
-                label="🚗 Registered EVs",
+                label="🚗 Registered EVs & Plug-In hybrids",
                 value=f"{registered_evs:,}",
                 delta=f"{round(((registered_evs/registered_evs_one_year_ago)-1)*100,2)}% YoY",
             )
