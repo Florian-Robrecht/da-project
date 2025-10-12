@@ -61,10 +61,10 @@ def load_and_prepare_data(path: str) -> pd.DataFrame | None:
             elif 50 <= power_kw <= 150:
                 return icon_data_yellow
             else:  # > 150 kW
-                return icon_data_green 
-            
+                return icon_data_green
+
         power_col = "Nennleistung Ladeeinrichtung [kW]"
-        df[power_col] = pd.to_numeric(df[power_col], errors='coerce')
+        df[power_col] = pd.to_numeric(df[power_col], errors="coerce")
 
         df["icon_data"] = df[power_col].apply(get_icon)
         return df
