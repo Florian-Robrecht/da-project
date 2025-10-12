@@ -55,6 +55,18 @@ def load_and_prepare_data(path: str) -> pd.DataFrame | None:
         return None
 
 
+#@st.cache_data
+#def load_grid_data(path: str) -> pd.DataFrame | None:
+#    """Loads the pre-computed grid data from a JSON file."""
+#    try:
+#        df = pd.read_json(path)
+#        return df
+#    except FileNotFoundError:
+#        st.error(f"Error: The grid data file '{path}' was not found.")
+#        st.info("Please run the `generate_grid.py` script first to create it.")
+#        return None
+
+
 def geocode_address(address: str) -> tuple[float, float] | None:
     """
     Converts a string address into latitude and longitude coordinates.
@@ -81,13 +93,17 @@ def main():
 
     st.markdown(
         """
-        This map shows the locations of train stations in Germany. 🚉
-        Enter a German address below to zoom in and place a marker on the map.
+        This map shows train station locations and estimates walking accessibility in Germany. 
+        The colored overlay represents the air-distance to the nearest station:
+        - **Green**: < 1 km
+        - **Yellow**: 1 - 2.5 km
+        - **Red**: > 2.5 km
         """
     )
 
     # --- LOAD DATA ---
     station_df = load_and_prepare_data(CONFIG["STATIONS_JSON_PATH"])
+    #grid_df = load_grid_data("reachability_grid.json")
     # --- USER INPUT ---
     address_input = st.text_input(
         "Enter a German address to locate on the map:",
@@ -109,14 +125,14 @@ def main():
 
     # --- CREATE STATION LAYER ---
     if station_df is not None and not station_df.empty:
-        station_layer =pdk.Layer(
+        station_layer = pdk.Layer(
             "IconLayer",
             data=station_df,
             get_icon="icon_data",
             get_position="[lon, lat]",
             size_units="meters",  # Set the size unit to meters
-            get_size=750, # Each icon will represent a 750-meter space
-            size_scale=1,      
+            get_size=750,  # Each icon will represent a 750-meter space
+            size_scale=1,
             pickable=True,
         )
         layers.append(station_layer)

@@ -13,7 +13,7 @@ load_dotenv()
 
 url = "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations"
 
-querystring = {"limit": "10000", "category": "1-7"}
+querystring = {"limit": "10000", "category": "1-2"}
 
 headers = {
     "accept": "application/json",
@@ -46,5 +46,5 @@ for station in response["result"]:
     )
 
 
-with open("all_stations.json", "w") as f:
+with open("all_stations_regio_ice_1_2.json", "w") as f:
     json.dump(final_station_data, f)
