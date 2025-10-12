@@ -20,35 +20,53 @@ CONFIG = {
     "INITIAL_MAP_LOCATION": [51.1657, 10.4515],
     "INITIAL_MAP_ZOOM": 5,
     "MAPBOX_STYLE": "mapbox://styles/mapbox/light-v9",
-    "EV_CHARGER_ICON_URL": "https://cdn.prod.website-files.com/672b9491a2b3a49f453f8338/68eb959c10a234c6efe509fd_1.png",
+    "EV_CHARGER_GREEN_ICON_URL": "https://cdn.prod.website-files.com/672b9491a2b3a49f453f8338/68eb959c10a234c6efe509fd_1.png",
+    "EV_CHARGER_YELLOW_ICON_URL": "https://cdn.prod.website-files.com/672b9491a2b3a49f453f8338/68eb959c530c133f73e18dd0_2.png",
+    "EV_CHARGER_RED_ICON_URL": "https://cdn.prod.website-files.com/672b9491a2b3a49f453f8338/68eb959ccac479937c34e3b6_3.png",
     "EV_CHARGER_DATASET_PUBLICATION": datetime(2025, 8, 26),
 }
-ref_year = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].year
-ref_month = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].month
+REF_YEAR = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].year
+REF_MONTH = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].month
 
 # --- HELPER FUNCTIONS ---
 
 
 @st.cache_data
 def load_and_prepare_data(path: str) -> pd.DataFrame | None:
-    """Loads train station data and prepares it for Pydeck."""
+    """Loads EV charging station data and prepares it for Pydeck."""
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        # Convert to DataFrame
         df = pd.DataFrame(data)
-        # Define the icon data once
-        icon_data = {
-            "url": CONFIG["EV_CHARGER_ICON_URL"],
-            "width": 128,
-            "height": 128,
-            "anchorY": 128,
-        }
-        # Add the icon data as a new column to every row in the DataFrame
-        df["icon_data"] = [icon_data] * len(df)
-        # Drop rows with missing coordinates
         df.dropna(subset=["lat", "lon"], inplace=True)
+
+        # 1. Define the distinct icon data dictionaries
+        # Using .copy() is crucial so each dictionary is a separate object
+        base_icon_data = {"width": 128, "height": 128, "anchorY": 128}
+
+        icon_data_red = base_icon_data.copy()
+        icon_data_red["url"] = CONFIG["EV_CHARGER_RED_ICON_URL"]
+
+        icon_data_yellow = base_icon_data.copy()
+        icon_data_yellow["url"] = CONFIG["EV_CHARGER_YELLOW_ICON_URL"]
+
+        icon_data_green = base_icon_data.copy()
+        icon_data_green["url"] = CONFIG["EV_CHARGER_GREEN_ICON_URL"]
+
+        def get_icon(power_kw: float) -> dict:
+            """Returns the correct icon dictionary based on charging power."""
+            if power_kw < 50:
+                return icon_data_red
+            elif 50 <= power_kw <= 150:
+                return icon_data_yellow
+            else:  # > 150 kW
+                return icon_data_green 
+            
+        power_col = "Nennleistung Ladeeinrichtung [kW]"
+        df[power_col] = pd.to_numeric(df[power_col], errors='coerce')
+
+        df["icon_data"] = df[power_col].apply(get_icon)
         return df
 
     except FileNotFoundError:
@@ -120,10 +138,10 @@ def main():
             registered_evs = ev_registrations_df["Count"].sum()
             registered_evs_one_year_ago = ev_registrations_df[
                 (
-                    (ev_registrations_df["Year"] < ref_year - 1)
+                    (ev_registrations_df["Year"] < REF_YEAR - 1)
                     | (
-                        (ev_registrations_df["Year"] == ref_year - 1)
-                        & (ev_registrations_df["Month"] <= ref_month)
+                        (ev_registrations_df["Year"] == REF_YEAR - 1)
+                        & (ev_registrations_df["Month"] <= REF_MONTH)
                     )
                 )
             ]["Count"].sum()
@@ -165,17 +183,18 @@ def main():
 
     # --- CREATE STATION LAYER ---
     if ev_station_df is not None and not ev_station_df.empty:
-        station_layer = pdk.Layer(
+        ev_station_layer_green = pdk.Layer(
             "IconLayer",
             data=ev_station_df,
             get_icon="icon_data",
             get_position="[lon, lat]",
-            size_units="meters",  # Set the size unit to meters
-            get_size=750,  # Each icon will represent a 750-meter space
+            size_units="pixels",
+            get_size=15,
             size_scale=1,
+            size_min_pixels=5,
             pickable=True,
         )
-        layers.append(station_layer)
+        layers.append(ev_station_layer_green)
 
     # --- HANDLE ADDRESS GEOCODING AND CREATE USER MARKER ---
     user_location_df = None
