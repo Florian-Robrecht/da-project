@@ -56,9 +56,9 @@ def load_and_prepare_data(path: str) -> pd.DataFrame | None:
             """Returns the correct icon dictionary based on charging power."""
             if power_kw < 50:
                 return icon_data_red
-            elif 50 <= power_kw <= 150:
+            elif 50 <= power_kw < 150:
                 return icon_data_yellow
-            else:  # > 150 kW
+            else:  # >= 150 kW
                 return icon_data_green
 
         power_col = "Nennleistung Ladeeinrichtung [kW]"
@@ -106,17 +106,23 @@ def main():
     )
     # --- LOAD DATA ---
     ev_station_df = load_and_prepare_data(CONFIG["STATIONS_JSON_PATH"])
-    ev_station_df["Inbetriebnahmedatum"] = pd.to_datetime(
-        ev_station_df["Inbetriebnahmedatum"], format="%d.%m.%Y"
-    )
+    if ev_station_df is not None and not ev_station_df.empty:
+        ev_station_df["Inbetriebnahmedatum"] = pd.to_datetime(
+            ev_station_df["Inbetriebnahmedatum"], format="%d.%m.%Y"
+        )
     ev_registrations_df = pd.read_csv("ev_registrations_cleaned.csv")
+    
+    # Initialize filtered dataframe
+    ev_station_df_filtered = ev_station_df
+    selected_year = None
+    
 
     # --- CREATE INFO CARDS ---
     # column1: EV Stations, column2: Registered EVs
     col1, col2, col3 = st.columns(3)
     with col1:
         try:
-            num_chargers = ev_station_df["Anzahl Ladepunkte"].sum()
+            num_chargers = ev_station_df_filtered["Anzahl Ladepunkte"].sum()
             # EV_CHARGER_DATASET_PUBLICATION - 1 year
             one_year_ago = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].replace(
                 year=CONFIG["EV_CHARGER_DATASET_PUBLICATION"].year - 1
@@ -124,8 +130,15 @@ def main():
             num_chargers_one_year_ago = ev_station_df[
                 ev_station_df["Inbetriebnahmedatum"] <= one_year_ago
             ]["Anzahl Ladepunkte"].sum()
+            
+            # Show different label based on whether filtering is applied
+            if selected_year and selected_year < max_year:
+                label = f"🔋 Public EV Chargers in Germany (up to {selected_year})"
+            else:
+                label = "🔋 Public EV Chargers in Germany"
+                
             st.metric(
-                label="🔋 Public EV Chargers in Germany",
+                label=label,
                 value=f"{num_chargers:,}",
                 delta=f"{round(((num_chargers/num_chargers_one_year_ago)-1)*100,2)}% YoY",
             )
@@ -160,11 +173,111 @@ def main():
         except (FileNotFoundError, pd.errors.ParserError):
             st.metric("📍 Charging Stations", "Data not available")
 
-    # --- USER INPUT ---
-    address_input = st.text_input(
-        "Enter a German address to locate on the map:",
-        placeholder="Adickesallee 32",
-    )
+    # --- SIDEBAR CONTROLS ---
+    with st.sidebar:
+        st.header("🔍 Map Controls")
+        
+        # --- ADDRESS SEARCH ---
+        st.subheader("📍 Address Search")
+        address_input = st.text_input(
+            "Enter a German address:",
+            placeholder="Adickesallee 32",
+            help="Search for a specific location on the map"
+        )
+        
+        # Handle address geocoding
+        coords = None
+        if address_input:
+            coords = geocode_address(address_input)
+            if coords:
+                st.success(f"📍 Found: {coords[0]:.5f}, {coords[1]:.5f}")
+            else:
+                st.error("Address not found. Please try another one.")
+        
+        st.divider()
+        
+        # --- POWER FILTER ---
+        st.subheader("⚡ Power Filter")
+        
+        # Power level filter checkboxes
+        show_low_power = st.checkbox("Chargers < 50kW", value=True, help="Show low power chargers")
+        show_medium_power = st.checkbox("Chargers ≥ 50kW and < 150kW", value=True, help="Show medium power chargers")
+        show_high_power = st.checkbox("Chargers ≥ 150kW", value=True, help="Show high power chargers")
+        
+        # Show power distribution info
+        if ev_station_df is not None and not ev_station_df.empty:
+            power_col = "Nennleistung Ladeeinrichtung [kW]"
+            
+            # Count stations by power level
+            low_power_count = len(ev_station_df[ev_station_df[power_col] < 50])
+            medium_power_count = len(ev_station_df[(ev_station_df[power_col] >= 50) & (ev_station_df[power_col] < 150)])
+            high_power_count = len(ev_station_df[ev_station_df[power_col] >= 150])
+            
+            st.caption(f"""
+            **Power Distribution:**
+            - < 50kW: {low_power_count:,} stations
+            - 50-150kW: {medium_power_count:,} stations  
+            - ≥ 150kW: {high_power_count:,} stations
+            """)
+        
+        st.divider()
+        
+        # --- YEAR FILTER ---
+        st.subheader("📅 Time Filter")
+        
+        if ev_station_df is not None and not ev_station_df.empty:
+            # Extract year range from the data
+            min_year = int(ev_station_df["Inbetriebnahmedatum"].dt.year.min())
+            max_year = int(ev_station_df["Inbetriebnahmedatum"].dt.year.max())
+            
+            # Create year slider
+            selected_year = st.slider(
+                "Show stations up to:",
+                min_value=min_year,
+                max_value=max_year,
+                value=max_year,  # Default to showing all stations
+                step=1,
+                help="Move the slider to see how the charging station network developed over time"
+            )
+            
+            # Filter data based on selected year
+            ev_station_df_filtered = ev_station_df[
+                ev_station_df["Inbetriebnahmedatum"].dt.year <= selected_year
+            ].copy()
+            
+            # Show information about filtered data
+            total_stations = len(ev_station_df)
+            filtered_stations = len(ev_station_df_filtered)
+            if selected_year < max_year:
+                st.caption(f"Showing {filtered_stations:,} stations (out of {total_stations:,} total) up to {selected_year}")
+            else:
+                st.caption(f"Showing all {filtered_stations:,} stations")
+        else:
+            st.info("No charging station data available")
+            selected_year = None
+            ev_station_df_filtered = ev_station_df
+    
+    # --- APPLY POWER FILTERING ---
+    if ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
+        power_col = "Nennleistung Ladeeinrichtung [kW]"
+        power_mask = pd.Series([False] * len(ev_station_df_filtered), index=ev_station_df_filtered.index)
+        
+        # Apply power filters
+        if show_low_power:
+            power_mask |= (ev_station_df_filtered[power_col] < 50)
+        if show_medium_power:
+            power_mask |= ((ev_station_df_filtered[power_col] >= 50) & (ev_station_df_filtered[power_col] < 150))
+        if show_high_power:
+            power_mask |= (ev_station_df_filtered[power_col] >= 150)
+        
+        # Apply the power filter
+        ev_station_df_filtered = ev_station_df_filtered[power_mask].copy()
+        
+        # Show power filter info in sidebar
+        with st.sidebar:
+            if not (show_low_power and show_medium_power and show_high_power):
+                filtered_power_stations = len(ev_station_df_filtered)
+                st.caption(f"⚡ Power filter: {filtered_power_stations:,} stations visible")
 
     # --- INITIALIZE MAP STATE ---
     # Use session_state to preserve the map's view across reruns
@@ -176,14 +289,20 @@ def main():
             pitch=0,
         )
 
+    # Update map view if address was found
+    if coords:
+        st.session_state.view_state.latitude = coords[0]
+        st.session_state.view_state.longitude = coords[1]
+        st.session_state.view_state.zoom = 10
+
     # List to hold all pydeck layers
     layers = []
 
     # --- CREATE STATION LAYER ---
-    if ev_station_df is not None and not ev_station_df.empty:
+    if ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
         ev_station_layer_green = pdk.Layer(
             "IconLayer",
-            data=ev_station_df,
+            data=ev_station_df_filtered,
             get_icon="icon_data",
             get_position="[lon, lat]",
             size_units="pixels",
@@ -194,33 +313,20 @@ def main():
         )
         layers.append(ev_station_layer_green)
 
-    # --- HANDLE ADDRESS GEOCODING AND CREATE USER MARKER ---
+    # --- CREATE USER MARKER ---
     user_location_df = None
-    if address_input:
-        coords = geocode_address(address_input)
-        if coords:
-            st.success(
-                f"📍 Found location: Latitude={coords[0]:.5f}, Longitude={coords[1]:.5f}"
-            )
-            # Update map view to center on the new address
-            st.session_state.view_state.latitude = coords[0]
-            st.session_state.view_state.longitude = coords[1]
-            st.session_state.view_state.zoom = 10
-
-            # Create a DataFrame for the user's location marker
-            user_location_df = pd.DataFrame(
-                [
-                    {
-                        "name": "Your Searched Location",
-                        "address": address_input,
-                        "lat": coords[0],
-                        "lon": coords[1],
-                    }
-                ]
-            )
-
-        else:
-            st.error("Could not find the address. Please try another one.")
+    if coords:
+        # Create a DataFrame for the user's location marker
+        user_location_df = pd.DataFrame(
+            [
+                {
+                    "name": "Your Searched Location",
+                    "address": address_input,
+                    "lat": coords[0],
+                    "lon": coords[1],
+                }
+            ]
+        )
 
     if user_location_df is not None:
         user_layer = pdk.Layer(
