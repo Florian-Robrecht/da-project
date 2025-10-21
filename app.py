@@ -15,7 +15,7 @@ from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 
 # --- CONFIGURATION ---
 CONFIG = {
-    "STATIONS_JSON_PATH": "ev_stations.json",
+    "STATIONS_JSON_PATH": "datasets/ev_stations.json",
     "APP_TITLE": "🔋🚗🇩🇪 Public EV Charging Stations in Germany",
     "INITIAL_MAP_LOCATION": [51.1657, 10.4515],
     "INITIAL_MAP_ZOOM": 5,
@@ -110,7 +110,7 @@ def main():
         ev_station_df["Inbetriebnahmedatum"] = pd.to_datetime(
             ev_station_df["Inbetriebnahmedatum"], format="%d.%m.%Y"
         )
-    ev_registrations_df = pd.read_csv("ev_registrations_cleaned.csv")
+    ev_registrations_df = pd.read_csv("datasets/ev_registrations_cleaned.csv")
     
     # Initialize filtered dataframe
     ev_station_df_filtered = ev_station_df

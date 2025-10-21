@@ -21,7 +21,7 @@ MONTH_MAP = {
 
 def clean_ev_charging_station_data():
     df = pd.read_csv(
-        "Ladesaeulenregister_BNetzA_2025-08-26.csv",
+        "datasets/Ladesaeulenregister_BNetzA_2025-08-26.csv",
         sep=";",
         encoding="latin1",
         skiprows=10,
@@ -48,7 +48,7 @@ def clean_ev_charging_station_data():
     ]
 
     df[columns_to_use].to_json(
-        "ev_stations.json",
+        "datasets/ev_stations.json",
         orient="records",
         indent=4,
         force_ascii=False,  # Important for German characters like 'ü'
@@ -56,7 +56,7 @@ def clean_ev_charging_station_data():
 
 
 def clean_ev_registration_data():
-    with open("ev_registrations.json", "r") as f:
+    with open("datasets/ev_registrations.json", "r") as f:
         data = json.load(f)
     df = pd.DataFrame(data)
     date_parts = df["datum"].str.split(n=1, expand=True)
@@ -72,6 +72,6 @@ def clean_ev_registration_data():
 
     # 4. Select and reorder columns to create the final DataFrame
     final_df = df[["Year", "Month", "Count", "Type"]]
-    final_df.to_csv("ev_registrations_cleaned.csv", index=False)
+    final_df.to_csv("datasets/ev_registrations_cleaned.csv", index=False)
 
 clean_ev_registration_data()
