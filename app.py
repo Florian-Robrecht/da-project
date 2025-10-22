@@ -9,6 +9,10 @@ import streamlit as st
 import pydeck as pdk
 import pandas as pd
 import json
+import matplotlib.pyplot as plt
+import numpy as np
+import altair as alt
+from scipy.stats import linregress
 from datetime import datetime
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
@@ -16,6 +20,7 @@ from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 # --- CONFIGURATION ---
 CONFIG = {
     "STATIONS_JSON_PATH": "datasets/ev_stations.json",
+    "ELECTRIC_CAR_REGISTRATIONS_PATH": "datasets/ev_registrations_cleaned.csv",
     "APP_TITLE": "🔋🚗🇩🇪 Public EV Charging Stations in Germany",
     "INITIAL_MAP_LOCATION": [51.1657, 10.4515],
     "INITIAL_MAP_ZOOM": 5,
@@ -27,6 +32,7 @@ CONFIG = {
 }
 REF_YEAR = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].year
 REF_MONTH = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].month
+
 
 # --- HELPER FUNCTIONS ---
 @st.cache_data
@@ -96,12 +102,17 @@ def geocode_address(address: str) -> tuple[float, float] | None:
 
 def main():
     """Main function to run the Streamlit application."""
-    st.set_page_config(page_title=CONFIG["APP_TITLE"], layout="wide")
+    st.set_page_config(
+        page_title=CONFIG["APP_TITLE"],
+        layout="wide",
+        page_icon="🔋",
+        initial_sidebar_state="expanded",
+    )
     st.title(CONFIG["APP_TITLE"])
 
     st.markdown(
         f"""
-        This website shows the progress of the transition to EVs in Germany - updated on {CONFIG["EV_CHARGER_DATASET_PUBLICATION"].strftime('%Y-%m-%d')}.
+        This website shows the progress of the transition to EVs in Germany, built by Janin Jankovski, Marlin Vigelius, Marlon Müller, and Florian Robrecht during the module "Introduction to Data Analytics in Business", tought by Prof. Dr. Lucas Böttcher - datasets last updated on {CONFIG["EV_CHARGER_DATASET_PUBLICATION"].strftime('%Y-%m-%d')}.
         """
     )
     # --- LOAD DATA ---
@@ -110,15 +121,16 @@ def main():
         ev_station_df["Inbetriebnahmedatum"] = pd.to_datetime(
             ev_station_df["Inbetriebnahmedatum"], format="%d.%m.%Y"
         )
-    ev_registrations_df = pd.read_csv("datasets/ev_registrations_cleaned.csv")
-    
+
+    ev_registrations_df = pd.read_csv(CONFIG["ELECTRIC_CAR_REGISTRATIONS_PATH"])
+
     # Initialize filtered dataframe
     ev_station_df_filtered = ev_station_df
     selected_year = None
-    
 
     # --- CREATE INFO CARDS ---
-    # column1: EV Stations, column2: Registered EVs
+    st.header("KPIs:")
+    # column1: EV Stations, column2: Registered EVs, column3: Registered EVs per public charger
     col1, col2, col3 = st.columns(3)
     with col1:
         try:
@@ -130,13 +142,13 @@ def main():
             num_chargers_one_year_ago = ev_station_df[
                 ev_station_df["Inbetriebnahmedatum"] <= one_year_ago
             ]["Anzahl Ladepunkte"].sum()
-            
+
             # Show different label based on whether filtering is applied
             if selected_year and selected_year < max_year:
                 label = f"🔋 Public EV Chargers in Germany (up to {selected_year})"
             else:
                 label = "🔋 Public EV Chargers in Germany"
-                
+
             st.metric(
                 label=label,
                 value=f"{num_chargers:,}",
@@ -173,18 +185,274 @@ def main():
         except (FileNotFoundError, pd.errors.ParserError):
             st.metric("📍 Charging Stations", "Data not available")
 
+    # --- BAR CHARTS ---
+    st.header("Registrations:")
+
+    # Create three columns for the charts
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.subheader("Charging Stations")
+        # Process charging station data from the JSON file
+        if ev_station_df is not None and not ev_station_df.empty:
+            # Group by year and count stations
+            yearly_stations = (
+                ev_station_df.groupby(ev_station_df["Inbetriebnahmedatum"].dt.year)
+                .size()
+                .reset_index(name="Count")
+            )
+            yearly_stations = yearly_stations.sort_values("Inbetriebnahmedatum")
+
+            # Prepare data for Streamlit bar chart
+            chart_data = yearly_stations.set_index("Inbetriebnahmedatum")["Count"]
+            st.bar_chart(chart_data, height=300)
+        else:
+            st.info("No charging station data available")
+
+    with col2:
+        st.subheader("Electric Cars")
+        # Process electric car registrations from CSV
+        try:
+            ev_registrations_df = pd.read_csv(CONFIG["ELECTRIC_CAR_REGISTRATIONS_PATH"])
+            electric_data = ev_registrations_df[
+                ev_registrations_df["Type"] == "Reine Elektroautos"
+            ]
+
+            # Group by year and sum registrations
+            yearly_electric = electric_data.groupby("Year")["Count"].sum().reset_index()
+            yearly_electric = yearly_electric.sort_values("Year")
+
+            # Prepare data for Streamlit bar chart
+            chart_data = yearly_electric.set_index("Year")["Count"]
+            st.bar_chart(chart_data, height=300)
+        except Exception as e:
+            st.info("No electric car registration data available")
+
+    with col3:
+        st.subheader("Plug-in Hybrid")
+        # Process hybrid car registrations from CSV
+        try:
+            ev_registrations_df = pd.read_csv(CONFIG["ELECTRIC_CAR_REGISTRATIONS_PATH"])
+            hybrid_data = ev_registrations_df[
+                ev_registrations_df["Type"] == "Plug-In Hybridautos"
+            ]
+
+            # Group by year and sum registrations
+            yearly_hybrid = hybrid_data.groupby("Year")["Count"].sum().reset_index()
+            yearly_hybrid = yearly_hybrid.sort_values("Year")
+
+            # Prepare data for Streamlit bar chart
+            chart_data = yearly_hybrid.set_index("Year")["Count"]
+            st.bar_chart(chart_data, height=300)
+        except Exception as e:
+            st.info("No hybrid car registration data available")
+
+    # --- MONTHLY CHARTS ---
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("📈 Monthly New Car Registrations: Electric vs Plug-in Hybrid")
+
+        try:
+            # Load and process monthly registration data
+            ev_registrations_df = pd.read_csv(CONFIG["ELECTRIC_CAR_REGISTRATIONS_PATH"])
+
+            # Create date column
+            ev_registrations_df["Date"] = pd.to_datetime(
+                ev_registrations_df["Year"].astype(str)
+                + "-"
+                + ev_registrations_df["Month"].astype(str)
+                + "-01"
+            )
+
+            # Filter for electric and hybrid data
+            electric_data = ev_registrations_df[
+                ev_registrations_df["Type"] == "Reine Elektroautos"
+            ]
+            hybrid_data = ev_registrations_df[
+                ev_registrations_df["Type"] == "Plug-In Hybridautos"
+            ]
+
+            # Prepare data for Streamlit line chart
+            # Create a combined DataFrame with both types
+            monthly_data = (
+                pd.DataFrame(
+                    {"Date": electric_data["Date"], "Electric": electric_data["Count"]}
+                )
+                .merge(
+                    pd.DataFrame(
+                        {
+                            "Date": hybrid_data["Date"],
+                            "Plug-in Hybrid": hybrid_data["Count"],
+                        }
+                    ),
+                    on="Date",
+                    how="outer",
+                )
+                .fillna(0)
+                .sort_values("Date")
+            )
+
+            # Set Date as index for Streamlit line chart
+            chart_data = monthly_data.set_index("Date")
+
+            # Create the line chart
+            st.line_chart(chart_data, height=400)
+
+        except Exception as e:
+            st.info("No monthly registration data available")
+
+    with col2:
+        st.subheader("📊 Regression Analysis: Charging Stations vs EV Registrations")
+
+        try:
+            # Load charging station data
+            if ev_station_df is not None and not ev_station_df.empty:
+                # Process charging station data by month
+                ev_station_df["Date"] = pd.to_datetime(
+                    ev_station_df["Inbetriebnahmedatum"], format="%d.%m.%Y"
+                )
+                ev_station_df["YearMonth"] = ev_station_df["Date"].dt.to_period("M")
+
+                # Group by month and sum charging points
+                monthly_charging = (
+                    ev_station_df.groupby("YearMonth")["Anzahl Ladepunkte"]
+                    .sum()
+                    .reset_index()
+                )
+                monthly_charging["Date"] = monthly_charging[
+                    "YearMonth"
+                ].dt.to_timestamp()
+                monthly_charging.rename(
+                    columns={"Anzahl Ladepunkte": "NewChargingPoints"}, inplace=True
+                )
+
+                # Load and process registration data
+                ev_registrations_df = pd.read_csv(
+                    CONFIG["ELECTRIC_CAR_REGISTRATIONS_PATH"]
+                )
+                ev_registrations_df["Date"] = pd.to_datetime(
+                    ev_registrations_df["Year"].astype(str)
+                    + "-"
+                    + ev_registrations_df["Month"].astype(str)
+                    + "-01"
+                )
+
+                # Sum all EV registrations (electric + hybrid) by month
+                monthly_registrations = (
+                    ev_registrations_df.groupby("Date")["Count"].sum().reset_index()
+                )
+                monthly_registrations.rename(
+                    columns={"Count": "TotalNewEVs"}, inplace=True
+                )
+
+                # Merge the datasets
+                merged_monthly = pd.merge(
+                    monthly_charging[["Date", "NewChargingPoints"]],
+                    monthly_registrations,
+                    on="Date",
+                    how="inner",
+                )
+
+                # Filter for recent data (from 2015 onwards)
+                start_date = pd.to_datetime("2015-01-01")
+                merged_monthly = merged_monthly[
+                    merged_monthly["Date"] >= start_date
+                ].copy()
+
+                if len(merged_monthly) > 1:
+                    # Perform linear regression
+                    slope, intercept, r_value, p_value, std_err = linregress(
+                        merged_monthly["NewChargingPoints"],
+                        merged_monthly["TotalNewEVs"],
+                    )
+
+                    # Create regression line data
+                    x_line = np.array([0, merged_monthly["NewChargingPoints"].max()])
+                    y_line = intercept + slope * x_line
+
+                    # Create data for Altair chart
+                    # Prepare scatter plot data
+                    scatter_data = merged_monthly[
+                        ["NewChargingPoints", "TotalNewEVs"]
+                    ].copy()
+                    scatter_data.columns = ["x", "y"]
+
+                    # Create regression line data
+                    x_min = merged_monthly["NewChargingPoints"].min()
+                    x_max = merged_monthly["NewChargingPoints"].max()
+                    x_range = np.linspace(x_min, x_max, 50)
+                    y_regression = intercept + slope * x_range
+
+                    line_data = pd.DataFrame({"x": x_range, "y": y_regression})
+
+                    # Create base chart
+                    base = alt.Chart(scatter_data).encode(
+                        x=alt.X("x:Q", title="New Charging Points per Month"),
+                        y=alt.Y(
+                            "y:Q", title="Total New EV + PHEV Registrations per Month"
+                        ),
+                    )
+
+                    # Create scatter plot
+                    scatter = base.mark_circle(
+                        size=60, color="#1f77b4", opacity=0.7
+                    ).encode(y="y")
+
+                    # Create regression line
+                    line = (
+                        alt.Chart(line_data)
+                        .mark_line(color="#ff7f0e", strokeWidth=3)
+                        .encode(
+                            x=alt.X("x:Q", title="New Charging Points per Month"),
+                            y=alt.Y(
+                                "y:Q",
+                                title="Total New EV + PHEV Registrations per Month",
+                            ),
+                        )
+                    )
+
+                    # Combine scatter and line
+                    chart = (scatter + line).resolve_scale(x="shared", y="shared")
+
+                    # Display the combined chart
+                    st.altair_chart(chart, use_container_width=True)
+
+                    st.caption(
+                        f"""
+                        **R²:** {r_value**2:.3f} | **Slope:** {slope:.2f} | **P-value:** {p_value:.3f}
+                        *(Blue dots = Monthly data points, Orange line = Regression fit)*
+                        """
+                    )
+
+                else:
+                    st.info("Insufficient data for regression analysis")
+            else:
+                st.info("No charging station data available for regression analysis")
+
+        except Exception as e:
+            st.info("Error in regression analysis")
+
+    st.divider()
+
+    # --- INTERACTIVE MAP ---
+    st.header("🗺️ Interactive Charging Station Map")
+    st.markdown(
+        "Explore Germany's EV charging infrastructure with real-time filtering and location search."
+    )
+
     # --- SIDEBAR CONTROLS ---
     with st.sidebar:
         st.header("🔍 Map Controls")
-        
+
         # --- ADDRESS SEARCH ---
         st.subheader("📍 Address Search")
         address_input = st.text_input(
             "Enter a German address:",
             placeholder="Adickesallee 32",
-            help="Search for a specific location on the map"
+            help="Search for a specific location on the map",
         )
-        
+
         # Handle address geocoding
         coords = None
         if address_input:
@@ -193,43 +461,55 @@ def main():
                 st.success(f"📍 Found: {coords[0]:.5f}, {coords[1]:.5f}")
             else:
                 st.error("Address not found. Please try another one.")
-        
+
         st.divider()
-        
+
         # --- POWER FILTER ---
         st.subheader("⚡ Power Filter")
-        
+
         # Power level filter checkboxes
-        show_low_power = st.checkbox("Chargers < 50kW", value=True, help="Show low power chargers")
-        show_medium_power = st.checkbox("Chargers ≥ 50kW and < 150kW", value=True, help="Show medium power chargers")
-        show_high_power = st.checkbox("Chargers ≥ 150kW", value=True, help="Show high power chargers")
-        
+        show_low_power = st.checkbox(
+            "Chargers < 50kW", value=True, help="Show low power chargers"
+        )
+        show_medium_power = st.checkbox(
+            "Chargers ≥ 50kW and < 150kW", value=True, help="Show medium power chargers"
+        )
+        show_high_power = st.checkbox(
+            "Chargers ≥ 150kW", value=True, help="Show high power chargers"
+        )
+
         # Show power distribution info
         if ev_station_df is not None and not ev_station_df.empty:
             power_col = "Nennleistung Ladeeinrichtung [kW]"
-            
+
             # Count stations by power level
             low_power_count = len(ev_station_df[ev_station_df[power_col] < 50])
-            medium_power_count = len(ev_station_df[(ev_station_df[power_col] >= 50) & (ev_station_df[power_col] < 150)])
+            medium_power_count = len(
+                ev_station_df[
+                    (ev_station_df[power_col] >= 50) & (ev_station_df[power_col] < 150)
+                ]
+            )
             high_power_count = len(ev_station_df[ev_station_df[power_col] >= 150])
-            
-            st.caption(f"""
+
+            st.caption(
+                f"""
             **Power Distribution:**
             - < 50kW: {low_power_count:,} stations
             - 50-150kW: {medium_power_count:,} stations  
             - ≥ 150kW: {high_power_count:,} stations
-            """)
-        
+            """
+            )
+
         st.divider()
-        
+
         # --- YEAR FILTER ---
         st.subheader("📅 Time Filter")
-        
+
         if ev_station_df is not None and not ev_station_df.empty:
             # Extract year range from the data
             min_year = int(ev_station_df["Inbetriebnahmedatum"].dt.year.min())
             max_year = int(ev_station_df["Inbetriebnahmedatum"].dt.year.max())
-            
+
             # Create year slider
             selected_year = st.slider(
                 "Show stations up to:",
@@ -237,47 +517,55 @@ def main():
                 max_value=max_year,
                 value=max_year,  # Default to showing all stations
                 step=1,
-                help="Move the slider to see how the charging station network developed over time"
+                help="Move the slider to see how the charging station network developed over time",
             )
-            
+
             # Filter data based on selected year
             ev_station_df_filtered = ev_station_df[
                 ev_station_df["Inbetriebnahmedatum"].dt.year <= selected_year
             ].copy()
-            
+
             # Show information about filtered data
             total_stations = len(ev_station_df)
             filtered_stations = len(ev_station_df_filtered)
             if selected_year < max_year:
-                st.caption(f"Showing {filtered_stations:,} stations (out of {total_stations:,} total) up to {selected_year}")
+                st.caption(
+                    f"Showing {filtered_stations:,} stations (out of {total_stations:,} total) up to {selected_year}"
+                )
             else:
                 st.caption(f"Showing all {filtered_stations:,} stations")
         else:
             st.info("No charging station data available")
             selected_year = None
             ev_station_df_filtered = ev_station_df
-    
+
     # --- APPLY POWER FILTERING ---
     if ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
         power_col = "Nennleistung Ladeeinrichtung [kW]"
-        power_mask = pd.Series([False] * len(ev_station_df_filtered), index=ev_station_df_filtered.index)
-        
+        power_mask = pd.Series(
+            [False] * len(ev_station_df_filtered), index=ev_station_df_filtered.index
+        )
+
         # Apply power filters
         if show_low_power:
-            power_mask |= (ev_station_df_filtered[power_col] < 50)
+            power_mask |= ev_station_df_filtered[power_col] < 50
         if show_medium_power:
-            power_mask |= ((ev_station_df_filtered[power_col] >= 50) & (ev_station_df_filtered[power_col] < 150))
+            power_mask |= (ev_station_df_filtered[power_col] >= 50) & (
+                ev_station_df_filtered[power_col] < 150
+            )
         if show_high_power:
-            power_mask |= (ev_station_df_filtered[power_col] >= 150)
-        
+            power_mask |= ev_station_df_filtered[power_col] >= 150
+
         # Apply the power filter
         ev_station_df_filtered = ev_station_df_filtered[power_mask].copy()
-        
+
         # Show power filter info in sidebar
         with st.sidebar:
             if not (show_low_power and show_medium_power and show_high_power):
                 filtered_power_stations = len(ev_station_df_filtered)
-                st.caption(f"⚡ Power filter: {filtered_power_stations:,} stations visible")
+                st.caption(
+                    f"⚡ Power filter: {filtered_power_stations:,} stations visible"
+                )
 
     # --- INITIALIZE MAP STATE ---
     # Use session_state to preserve the map's view across reruns
@@ -362,7 +650,7 @@ def main():
             tooltip=tooltip,
             api_keys={"mapbox": mapbox_api_key},
         ),
-        use_container_width=True,
+        width=1000,
         height=700,
     )
 
