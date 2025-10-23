@@ -51,7 +51,7 @@ def clean_ev_charging_station_data():
         "datasets/ev_stations.json",
         orient="records",
         indent=4,
-        force_ascii=False,  # Important for German characters like 'ü'
+        force_ascii=False, 
     )
 
 
