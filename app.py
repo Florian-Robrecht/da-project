@@ -21,6 +21,7 @@ from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 CONFIG = {
     "STATIONS_JSON_PATH": "datasets/ev_stations.json",
     "ELECTRIC_CAR_REGISTRATIONS_PATH": "datasets/ev_registrations_cleaned.csv",
+    "TEN_T_CORE_GEOJSON_PATH": "datasets/ten-t.geojson",
     "APP_TITLE": "🔋🚗🇩🇪 Public EV Charging Stations in Germany",
     "INITIAL_MAP_LOCATION": [51.1657, 10.4515],
     "INITIAL_MAP_ZOOM": 5,
@@ -98,6 +99,20 @@ def geocode_address(address: str) -> tuple[float, float] | None:
     except (GeocoderTimedOut, GeocoderUnavailable):
         st.warning("Geocoding service is unavailable. Please try again later.")
         return None
+
+@st.cache_data
+def load_tent_geojson(path: str) -> dict | None:
+    """Loads the TEN-T core network GeoJSON."""
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        st.warning(f"TEN-T file not found at: {path}")
+        return None
+    except json.JSONDecodeError as e:
+        st.error(f"Invalid TEN-T GeoJSON: {e}")
+        return None
+
 
 
 def main():
@@ -502,6 +517,10 @@ def main():
 
         st.divider()
 
+        st.subheader("🛣️ TEN-T Core Network")
+        show_tent = st.checkbox("Show TEN-T core roads", value=True, help="EU core network roads")
+
+        st.divider()
         # --- YEAR FILTER ---
         st.subheader("📅 Time Filter")
 
@@ -585,6 +604,26 @@ def main():
 
     # List to hold all pydeck layers
     layers = []
+
+    # --- CREATE TEN-T CORE NETWORK LAYER ---
+    # --- TEN-T CORE LAYER ---
+    ten_t_geojson = load_tent_geojson(CONFIG["TEN_T_CORE_GEOJSON_PATH"])
+    
+    if show_tent and ten_t_geojson is not None:
+        tent_layer = pdk.Layer(
+            "GeoJsonLayer",
+            data=ten_t_geojson,
+            stroked=True,
+            filled=False,               # linework only
+            get_line_color=[30, 100, 210, 180],  # bluish
+            get_line_width=2,
+            line_width_min_pixels=1,
+            pickable=False,             # keep off to avoid clashing with your tooltip
+            auto_highlight=False,
+        )
+        # Draw roads underneath points/icons so chargers stay visible
+        layers.insert(0, tent_layer)
+
 
     # --- CREATE STATION LAYER ---
     if ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
