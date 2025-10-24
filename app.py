@@ -9,7 +9,6 @@ import streamlit as st
 import pydeck as pdk
 import pandas as pd
 import json
-import matplotlib.pyplot as plt
 import numpy as np
 import altair as alt
 from scipy.stats import linregress
