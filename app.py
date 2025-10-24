@@ -15,6 +15,9 @@ from scipy.stats import linregress
 from datetime import datetime
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
+from shapely.geometry import LineString, Point
+from shapely.ops import substring
+import math
 
 # --- CONFIGURATION ---
 CONFIG = {
@@ -111,6 +114,192 @@ def load_tent_geojson(path: str) -> dict | None:
     except json.JSONDecodeError as e:
         st.error(f"Invalid TEN-T GeoJSON: {e}")
         return None
+
+
+def haversine_distance(lon1, lat1, lon2, lat2):
+    """
+    Calculate the great circle distance between two points 
+    on the earth (specified in decimal degrees) in kilometers.
+    """
+    # Convert decimal degrees to radians
+    lon1, lat1, lon2, lat2 = map(math.radians, [lon1, lat1, lon2, lat2])
+    
+    # Haversine formula
+    dlon = lon2 - lon1
+    dlat = lat2 - lat1
+    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+    c = 2 * math.asin(math.sqrt(a))
+    r = 6371  # Radius of earth in kilometers
+    return c * r
+
+
+@st.cache_data
+def process_tent_roads(geojson_data: dict, segment_length_km: float = 5.0) -> list:
+    """
+    Process TEN-T GeoJSON into segments for coverage analysis.
+    
+    Args:
+        geojson_data: The TEN-T GeoJSON data
+        segment_length_km: Target length for each segment in kilometers
+        
+    Returns:
+        List of segment dictionaries with start/end coordinates and midpoint
+    """
+    segments = []
+    
+    for feature in geojson_data.get("features", []):
+        geometry = feature.get("geometry", {})
+        if geometry.get("type") != "LineString":
+            continue
+            
+        coords = geometry.get("coordinates", [])
+        if len(coords) < 2:
+            continue
+        
+        # Create shapely LineString
+        line = LineString(coords)
+        
+        # Sample points along the line at regular intervals
+        # Approximate: 1 degree ≈ 111 km at equator, less at higher latitudes
+        # For Germany (lat ~50°), 1 degree lon ≈ 71 km, 1 degree lat ≈ 111 km
+        # We'll use actual distance calculation
+        
+        total_length_degrees = line.length
+        # Rough approximation: convert degrees to km (using ~100 km per degree as average)
+        approx_length_km = total_length_degrees * 100
+        
+        # Number of segments
+        num_segments = max(int(approx_length_km / segment_length_km), 1)
+        
+        # Create segments
+        for i in range(num_segments):
+            start_fraction = i / num_segments
+            end_fraction = (i + 1) / num_segments
+            
+            # Get segment
+            segment_line = substring(line, start_fraction, end_fraction, normalized=True)
+            
+            # Get start and end coordinates
+            segment_coords = list(segment_line.coords)
+            if len(segment_coords) < 2:
+                continue
+                
+            start_lon, start_lat = segment_coords[0]
+            end_lon, end_lat = segment_coords[-1]
+            
+            # Calculate midpoint
+            mid_lon = (start_lon + end_lon) / 2
+            mid_lat = (start_lat + end_lat) / 2
+            
+            # Convert coords to plain Python lists of floats for JSON serialization
+            coords_list = [[float(lon), float(lat)] for lon, lat in segment_coords]
+            
+            segments.append({
+                "start": [float(start_lon), float(start_lat)],
+                "end": [float(end_lon), float(end_lat)],
+                "midpoint": [float(mid_lon), float(mid_lat)],
+                "coords": coords_list
+            })
+    
+    return segments
+
+
+def haversine_distance_vectorized(lon1, lat1, lon_array, lat_array):
+    """
+    Calculate haversine distance from one point to multiple points.
+    Vectorized for performance.
+    
+    Args:
+        lon1, lat1: Single point coordinates
+        lon_array, lat_array: Arrays of coordinates
+        
+    Returns:
+        Array of distances in kilometers
+    """
+    # Convert to radians
+    lon1_rad = math.radians(lon1)
+    lat1_rad = math.radians(lat1)
+    lon_array_rad = np.radians(lon_array)
+    lat_array_rad = np.radians(lat_array)
+    
+    # Haversine formula
+    dlon = lon_array_rad - lon1_rad
+    dlat = lat_array_rad - lat1_rad
+    
+    a = np.sin(dlat/2)**2 + np.cos(lat1_rad) * np.cos(lat_array_rad) * np.sin(dlon/2)**2
+    c = 2 * np.arcsin(np.sqrt(a))
+    
+    return 6371 * c  # Earth radius in km
+
+
+def check_segment_coverage(segment, high_power_chargers_df, max_distance_km=60):
+    """
+    Check if a road segment has coverage from high-power chargers.
+    
+    Args:
+        segment: Dictionary with segment information
+        high_power_chargers_df: DataFrame of chargers ≥150kW
+        max_distance_km: Maximum distance in km to consider coverage
+        
+    Returns:
+        True if covered, False otherwise
+    """
+    if high_power_chargers_df.empty:
+        return False
+    
+    mid_lon, mid_lat = segment["midpoint"]
+    
+    # Vectorized distance calculation to all chargers
+    distances = haversine_distance_vectorized(
+        mid_lon, mid_lat,
+        high_power_chargers_df['lon'].values,
+        high_power_chargers_df['lat'].values
+    )
+    
+    # Check if any charger is within range
+    return (distances <= max_distance_km).any()
+
+
+def create_coverage_geojson(segments, high_power_chargers_df, max_distance_km=60):
+    """
+    Create separate GeoJSON objects for covered (blue) and uncovered (red) segments.
+    
+    Returns:
+        Tuple of (covered_geojson, uncovered_geojson)
+    """
+    covered_features = []
+    uncovered_features = []
+    
+    for segment in segments:
+        is_covered = check_segment_coverage(segment, high_power_chargers_df, max_distance_km)
+        
+        feature = {
+            "type": "Feature",
+            "geometry": {
+                "type": "LineString",
+                "coordinates": segment["coords"]  # Already converted to plain Python floats
+            },
+            "properties": {
+                "covered": bool(is_covered)
+            }
+        }
+        
+        if is_covered:
+            covered_features.append(feature)
+        else:
+            uncovered_features.append(feature)
+    
+    covered_geojson = {
+        "type": "FeatureCollection",
+        "features": covered_features
+    }
+    
+    uncovered_geojson = {
+        "type": "FeatureCollection",
+        "features": uncovered_features
+    }
+    
+    return covered_geojson, uncovered_geojson
 
 
 
@@ -518,6 +707,20 @@ def main():
 
         st.subheader("🛣️ TEN-T Core Network")
         show_tent = st.checkbox("Show TEN-T core roads", value=True, help="EU core network roads")
+        
+        # Placeholder for coverage stats (will be calculated and displayed later)
+        coverage_stats_placeholder = st.empty()
+        
+        if show_tent:
+            st.caption(
+                """
+                **Coverage Analysis:**
+                - 🔵 Blue: Roads with ≥150kW charger within 60km
+                - 🔴 Red: Roads without coverage
+                
+                Coverage updates based on the year filter.
+                """
+            )
 
         st.divider()
         # --- YEAR FILTER ---
@@ -585,6 +788,46 @@ def main():
                     f"⚡ Power filter: {filtered_power_stations:,} stations visible"
                 )
 
+    # --- CALCULATE TEN-T COVERAGE STATISTICS FOR SIDEBAR ---
+    coverage_num_covered = 0
+    coverage_total_segments = 0
+    coverage_percentage = 0.0
+    
+    ten_t_geojson_for_stats = load_tent_geojson(CONFIG["TEN_T_CORE_GEOJSON_PATH"])
+    if show_tent and ten_t_geojson_for_stats is not None:
+        road_segments_for_stats = process_tent_roads(ten_t_geojson_for_stats, segment_length_km=5.0)
+        
+        # Filter high-power chargers for coverage calculation
+        if ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
+            power_col = "Nennleistung Ladeeinrichtung [kW]"
+            high_power_chargers_stats = ev_station_df_filtered[
+                ev_station_df_filtered[power_col] >= 150
+            ].copy()
+        else:
+            high_power_chargers_stats = pd.DataFrame()
+        
+        # Calculate coverage
+        covered_geojson_stats, uncovered_geojson_stats = create_coverage_geojson(
+            road_segments_for_stats, high_power_chargers_stats, max_distance_km=60
+        )
+        
+        coverage_num_covered = len(covered_geojson_stats["features"])
+        coverage_num_uncovered = len(uncovered_geojson_stats["features"])
+        coverage_total_segments = coverage_num_covered + coverage_num_uncovered
+        coverage_percentage = (coverage_num_covered / coverage_total_segments * 100) if coverage_total_segments > 0 else 0
+    
+    # Display coverage in sidebar using the placeholder
+    if show_tent and coverage_total_segments > 0:
+        with coverage_stats_placeholder.container():
+            st.metric(
+                label="🛣️ TEN-T Road Coverage",
+                value=f"{coverage_percentage:.1f}%",
+                help="Percentage of road segments with ≥150kW charger within 60km"
+            )
+            st.caption(
+                f"**{coverage_num_covered:,}** of **{coverage_total_segments:,}** segments covered"
+            )
+
     # --- INITIALIZE MAP STATE ---
     # Use session_state to preserve the map's view across reruns
     if "view_state" not in st.session_state:
@@ -604,24 +847,56 @@ def main():
     # List to hold all pydeck layers
     layers = []
 
-    # --- CREATE TEN-T CORE NETWORK LAYER ---
-    # --- TEN-T CORE LAYER ---
+    # --- CREATE TEN-T CORE NETWORK LAYER WITH COVERAGE ANALYSIS ---
     ten_t_geojson = load_tent_geojson(CONFIG["TEN_T_CORE_GEOJSON_PATH"])
     
     if show_tent and ten_t_geojson is not None:
-        tent_layer = pdk.Layer(
-            "GeoJsonLayer",
-            data=ten_t_geojson,
-            stroked=True,
-            filled=False,               # linework only
-            get_line_color=[30, 100, 210, 180],  # bluish
-            get_line_width=2,
-            line_width_min_pixels=1,
-            pickable=False,             # keep off to avoid clashing with your tooltip
-            auto_highlight=False,
+        # Pre-process TEN-T roads into segments (cached)
+        road_segments = process_tent_roads(ten_t_geojson, segment_length_km=5.0)
+        
+        # Filter high-power chargers based on selected year and power
+        if ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
+            power_col = "Nennleistung Ladeeinrichtung [kW]"
+            high_power_chargers = ev_station_df_filtered[
+                ev_station_df_filtered[power_col] >= 150
+            ].copy()
+        else:
+            high_power_chargers = pd.DataFrame()
+        
+        # Create coverage GeoJSON (covered in blue, uncovered in red)
+        covered_geojson, uncovered_geojson = create_coverage_geojson(
+            road_segments, high_power_chargers, max_distance_km=60
         )
-        # Draw roads underneath points/icons so chargers stay visible
-        layers.insert(0, tent_layer)
+        
+        # Create layer for covered segments (blue)
+        if covered_geojson["features"]:
+            covered_layer = pdk.Layer(
+                "GeoJsonLayer",
+                data=covered_geojson,
+                stroked=True,
+                filled=False,
+                get_line_color=[30, 100, 210, 180],  # blue
+                get_line_width=2,
+                line_width_min_pixels=1,
+                pickable=False,
+                auto_highlight=False,
+            )
+            layers.insert(0, covered_layer)
+        
+        # Create layer for uncovered segments (red)
+        if uncovered_geojson["features"]:
+            uncovered_layer = pdk.Layer(
+                "GeoJsonLayer",
+                data=uncovered_geojson,
+                stroked=True,
+                filled=False,
+                get_line_color=[210, 30, 30, 200],  # red
+                get_line_width=3,  # Slightly thicker to make it more visible
+                line_width_min_pixels=2,
+                pickable=False,
+                auto_highlight=False,
+            )
+            layers.insert(0, uncovered_layer)
 
 
     # --- CREATE STATION LAYER ---
