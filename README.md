@@ -130,3 +130,7 @@ Developed by **Janin Jankovski**, **Marlin Vigelius**, **Marlon Müller**, and *
 - [New Plug-in Hybrid Registrations in Germany](https://de.statista.com/statistik/daten/studie/1241597/umfrage/neuzulassungen-von-plug-in-hybridfahrzeugen-in-deutschland/) - German PHEV registration data
 - [New Charging Points in Germany](https://www.statista.com/statistics/1300745/public-charging-stations-electric-cars-germany/) - German charging infrastructure development
 ---
+
+### AI Assistance Disclaimer
+
+Some parts of this codebase were generated using the **Cursor IDE** with the **"claude-4.5-sonnet"** model. All AI-generated code has been carefully reviewed and validated by our team to ensure correctness and quality.
