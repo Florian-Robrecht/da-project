@@ -180,13 +180,13 @@ def haversine_distance(lon1: float, lat1: float, lon2: float, lat2: float) -> fl
 
 
 @st.cache_data
-def process_tent_roads(geojson_data: dict, segment_length_km: float = 5.0) -> list:
+def process_tent_roads(geojson_data: dict, segment_length_km: float = 2.5) -> list:
     """
     Process TEN-T GeoJSON into segments for coverage analysis.
 
     Args:
         geojson_data (dict): The TEN-T GeoJSON data
-        segment_length_km: Target length for each segment in kilometers
+        segment_length_km: Target length for each segment in kilometers (default: 2.5km)
 
     Returns:
         List of segment dictionaries with start/end coordinates and midpoint
@@ -842,6 +842,7 @@ def main():
                 - 🔴 Red: Roads without coverage
                 
                 Only chargers ≥150kW within 3km of TEN-T network are considered.
+                Roads are analyzed in 2.5km segments for improved accuracy.
                 Coverage updates based on the year filter.
                 """
             )
@@ -922,7 +923,7 @@ def main():
         ten_t_geojson_for_filter = load_tent_geojson(CONFIG["TEN_T_CORE_GEOJSON_PATH"])
         if ten_t_geojson_for_filter is not None:
             road_segments_for_filter = process_tent_roads(
-                ten_t_geojson_for_filter, segment_length_km=5.0
+                ten_t_geojson_for_filter, segment_length_km=2.5
             )
 
             # First, filter to only high power chargers (≥150kW)
@@ -950,7 +951,7 @@ def main():
     ten_t_geojson_for_stats = load_tent_geojson(CONFIG["TEN_T_CORE_GEOJSON_PATH"])
     if show_tent and ten_t_geojson_for_stats is not None:
         road_segments_for_stats = process_tent_roads(
-            ten_t_geojson_for_stats, segment_length_km=5.0
+            ten_t_geojson_for_stats, segment_length_km=2.5
         )
 
         # Filter high-power chargers for coverage calculation
@@ -1017,7 +1018,7 @@ def main():
 
     if show_tent and ten_t_geojson is not None:
         # Pre-process TEN-T roads into segments (cached)
-        road_segments = process_tent_roads(ten_t_geojson, segment_length_km=5.0)
+        road_segments = process_tent_roads(ten_t_geojson, segment_length_km=2.5)
 
         # Filter high-power chargers based on selected year and power
         if ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
