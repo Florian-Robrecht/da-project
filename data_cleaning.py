@@ -20,6 +20,13 @@ MONTH_MAP = {
 
 
 def clean_ev_charging_station_data():
+    """Cleans the EV charging station data from the CSV file.
+    Args:
+        None
+
+    Returns:
+        None
+    """
     df = pd.read_csv(
         "datasets/Ladesaeulenregister_BNetzA_2025-08-26.csv",
         sep=";",
@@ -56,6 +63,13 @@ def clean_ev_charging_station_data():
 
 
 def clean_ev_registration_data():
+    """Cleans the EV registration data from the JSON file.
+    Args:
+        None
+
+    Returns:
+        None
+    """
     with open("datasets/ev_registrations.json", "r") as f:
         data = json.load(f)
     df = pd.DataFrame(data)

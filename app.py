@@ -1,25 +1,27 @@
 """
-A Streamlit web application to visualize train station accessibility in Germany using Pydeck.
+A Streamlit web application to visualize EV charging infrastructure in Germany using Pydeck.
 
-This app displays all train stations on an interactive map. Users can input
-an address to place a marker and zoom to its location.
+This app displays all public EV charging stations on an interactive map. Users can input
+an address to place a marker and zoom to its location. Additionally, the app displays the TEN-T core road network of Germany and the coverage
+of the charging infrastructure within the TEN-T network.
 """
-import os 
-import streamlit as st
-import pydeck as pdk
-import pandas as pd
+
 import json
-import numpy as np
-import altair as alt
-from scipy.stats import linregress
+import math
+import os
 from datetime import datetime
-from geopy.geocoders import Nominatim
+
+import altair as alt
+import numpy as np
+import pandas as pd
+import pydeck as pdk
+import streamlit as st
+from dotenv import load_dotenv
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
+from geopy.geocoders import Nominatim
+from scipy.stats import linregress
 from shapely.geometry import LineString
 from shapely.ops import substring
-import math
-
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -44,7 +46,15 @@ REF_MONTH = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].month
 # --- HELPER FUNCTIONS ---
 @st.cache_data
 def load_and_prepare_data(path: str) -> pd.DataFrame | None:
-    """Loads EV charging station data and prepares it for Pydeck."""
+    """Loads EV charging station data from a JSON file and prepares it for Pydeck visualization.
+
+    Args:
+        path (str): The file path to the JSON data source.
+
+    Returns:
+        pd.DataFrame | None: A DataFrame with an 'icon_data' column ready for
+        Pydeck, or None if loading or processing fails.
+    """
     try:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -66,7 +76,13 @@ def load_and_prepare_data(path: str) -> pd.DataFrame | None:
         icon_data_green["url"] = CONFIG["EV_CHARGER_GREEN_ICON_URL"]
 
         def get_icon(power_kw: float) -> dict:
-            """Returns the correct icon dictionary based on charging power."""
+            """Returns the correct icon dictionary based on charging power.
+            Args:
+                power_kw (float): The charging power in kilowatts.
+
+            Returns:
+                dict: The icon dictionary for the given charging power.
+            """
             if power_kw < 50:
                 return icon_data_red
             elif 50 <= power_kw < 150:
@@ -92,11 +108,17 @@ def geocode_address(address: str) -> tuple[float, float] | None:
     """
     Converts a string address into latitude and longitude coordinates.
     Returns a tuple (lat, lon) or None if not found.
+
+    Args:
+        address (str): The address to geocode.
+
+    Returns:
+        tuple[float, float] | None: A tuple (lat, lon) or None if not found.
     """
     if not address:
         return None
 
-    geolocator = Nominatim(user_agent="train_station_accessibility_app_pydeck")
+    geolocator = Nominatim(user_agent="ev_station_accessibility_app_pydeck")
     try:
         location = geolocator.geocode(address, country_codes="DE", timeout=10)
         if location:
@@ -106,9 +128,17 @@ def geocode_address(address: str) -> tuple[float, float] | None:
         st.warning("Geocoding service is unavailable. Please try again later.")
         return None
 
+
 @st.cache_data
 def load_tent_geojson(path: str) -> dict | None:
-    """Loads the TEN-T core network GeoJSON."""
+    """Loads the TEN-T core network GeoJSON.
+
+    Args:
+        path (str): The file path to the TEN-T GeoJSON data source.
+
+    Returns:
+        dict | None: A dictionary containing the TEN-T GeoJSON data or None if loading fails.
+    """
     try:
         with open(path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -120,18 +150,30 @@ def load_tent_geojson(path: str) -> dict | None:
         return None
 
 
-def haversine_distance(lon1, lat1, lon2, lat2):
+def haversine_distance(lon1: float, lat1: float, lon2: float, lat2: float) -> float:
     """
-    Calculate the great circle distance between two points 
+    Calculate the great circle distance between two points
     on the earth (specified in decimal degrees) in kilometers.
+
+    Args:
+        lon1 (float): The longitude of the first point.
+        lat1 (float): The latitude of the first point.
+        lon2 (float): The longitude of the second point.
+        lat2 (float): The latitude of the second point.
+
+    Returns:
+        float: The great circle distance between the two points in kilometers.
     """
     # Convert decimal degrees to radians
     lon1, lat1, lon2, lat2 = map(math.radians, [lon1, lat1, lon2, lat2])
-    
+
     # Haversine formula
     dlon = lon2 - lon1
     dlat = lat2 - lat1
-    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+    a = (
+        math.sin(dlat / 2) ** 2
+        + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    )
     c = 2 * math.asin(math.sqrt(a))
     r = 6371  # Radius of earth in kilometers
     return c * r
@@ -141,82 +183,88 @@ def haversine_distance(lon1, lat1, lon2, lat2):
 def process_tent_roads(geojson_data: dict, segment_length_km: float = 5.0) -> list:
     """
     Process TEN-T GeoJSON into segments for coverage analysis.
-    
+
     Args:
-        geojson_data: The TEN-T GeoJSON data
+        geojson_data (dict): The TEN-T GeoJSON data
         segment_length_km: Target length for each segment in kilometers
-        
+
     Returns:
         List of segment dictionaries with start/end coordinates and midpoint
     """
     segments = []
-    
+
     for feature in geojson_data.get("features", []):
         geometry = feature.get("geometry", {})
         if geometry.get("type") != "LineString":
             continue
-            
+
         coords = geometry.get("coordinates", [])
         if len(coords) < 2:
             continue
-        
+
         # Create shapely LineString
         line = LineString(coords)
-        
+
         # Sample points along the line at regular intervals
         # Approximate: 1 degree ≈ 111 km at equator, less at higher latitudes
         # For Germany (lat ~50°), 1 degree lon ≈ 71 km, 1 degree lat ≈ 111 km
         # We'll use actual distance calculation
-        
+
         total_length_degrees = line.length
         # Rough approximation: convert degrees to km (using ~100 km per degree as average)
         approx_length_km = total_length_degrees * 100
-        
+
         # Number of segments
         num_segments = max(int(approx_length_km / segment_length_km), 1)
-        
+
         # Create segments
         for i in range(num_segments):
             start_fraction = i / num_segments
             end_fraction = (i + 1) / num_segments
-            
+
             # Get segment
-            segment_line = substring(line, start_fraction, end_fraction, normalized=True)
-            
+            segment_line = substring(
+                line, start_fraction, end_fraction, normalized=True
+            )
+
             # Get start and end coordinates
             segment_coords = list(segment_line.coords)
             if len(segment_coords) < 2:
                 continue
-                
+
             start_lon, start_lat = segment_coords[0]
             end_lon, end_lat = segment_coords[-1]
-            
+
             # Calculate midpoint
             mid_lon = (start_lon + end_lon) / 2
             mid_lat = (start_lat + end_lat) / 2
-            
+
             # Convert coords to plain Python lists of floats for JSON serialization
             coords_list = [[float(lon), float(lat)] for lon, lat in segment_coords]
-            
-            segments.append({
-                "start": [float(start_lon), float(start_lat)],
-                "end": [float(end_lon), float(end_lat)],
-                "midpoint": [float(mid_lon), float(mid_lat)],
-                "coords": coords_list
-            })
-    
+
+            segments.append(
+                {
+                    "start": [float(start_lon), float(start_lat)],
+                    "end": [float(end_lon), float(end_lat)],
+                    "midpoint": [float(mid_lon), float(mid_lat)],
+                    "coords": coords_list,
+                }
+            )
+
     return segments
 
 
-def haversine_distance_vectorized(lon1, lat1, lon_array, lat_array):
+def haversine_distance_vectorized(
+    lon1: float, lat1: float, lon_array: np.array, lat_array: np.array
+) -> np.array:
     """
     Calculate haversine distance from one point to multiple points.
     Vectorized for performance.
-    
+
     Args:
         lon1, lat1: Single point coordinates
         lon_array, lat_array: Arrays of coordinates
-        
+
     Returns:
         Array of distances in kilometers
     """
@@ -225,141 +273,152 @@ def haversine_distance_vectorized(lon1, lat1, lon_array, lat_array):
     lat1_rad = math.radians(lat1)
     lon_array_rad = np.radians(lon_array)
     lat_array_rad = np.radians(lat_array)
-    
+
     # Haversine formula
     dlon = lon_array_rad - lon1_rad
     dlat = lat_array_rad - lat1_rad
-    
-    a = np.sin(dlat/2)**2 + np.cos(lat1_rad) * np.cos(lat_array_rad) * np.sin(dlon/2)**2
+
+    a = (
+        np.sin(dlat / 2) ** 2
+        + np.cos(lat1_rad) * np.cos(lat_array_rad) * np.sin(dlon / 2) ** 2
+    )
     c = 2 * np.arcsin(np.sqrt(a))
-    
+
     return 6371 * c  # Earth radius in km
 
 
-def check_segment_coverage(segment, high_power_chargers_df, max_distance_km=60):
+def check_segment_coverage(
+    segment: dict, high_power_chargers_df: pd.DataFrame, max_distance_km: float = 60
+) -> bool:
     """
     Check if a road segment has coverage from high-power chargers.
-    
+
     Args:
         segment: Dictionary with segment information
         high_power_chargers_df: DataFrame of chargers ≥150kW
         max_distance_km: Maximum distance in km to consider coverage
-        
+
     Returns:
         True if covered, False otherwise
     """
     if high_power_chargers_df.empty:
         return False
-    
+
     mid_lon, mid_lat = segment["midpoint"]
-    
+
     # Vectorized distance calculation to all chargers
     distances = haversine_distance_vectorized(
-        mid_lon, mid_lat,
-        high_power_chargers_df['lon'].values,
-        high_power_chargers_df['lat'].values
+        mid_lon,
+        mid_lat,
+        high_power_chargers_df["lon"].values,
+        high_power_chargers_df["lat"].values,
     )
-    
+
     # Check if any charger is within range
     return (distances <= max_distance_km).any()
 
 
-def filter_chargers_near_tent(chargers_df, road_segments, max_distance_km=3.0):
+def filter_chargers_near_tent(
+    chargers_df: pd.DataFrame, road_segments: list, max_distance_km: float = 3.0
+) -> pd.DataFrame:
     """
     Filter chargers to only include those within max_distance_km of the TEN-T network.
-    
+
     Args:
         chargers_df: DataFrame of chargers to filter
         road_segments: List of road segment dictionaries from process_tent_roads
         max_distance_km: Maximum distance in km to consider a charger near TEN-T
-        
+
     Returns:
         Filtered DataFrame containing only chargers near TEN-T network
     """
     if chargers_df.empty or not road_segments:
         return chargers_df
-    
+
     # Extract all points from road segments
     tent_points = []
     for segment in road_segments:
         # Use midpoint of each segment for efficiency
         tent_points.append(segment["midpoint"])
-    
+
     if not tent_points:
         return chargers_df
-    
+
     # Convert to numpy arrays for vectorized operations
     tent_lons = np.array([p[0] for p in tent_points])
     tent_lats = np.array([p[1] for p in tent_points])
-    
+
     # For each charger, find minimum distance to any TEN-T point
     charger_near_tent = []
-    
+
     for _, charger in chargers_df.iterrows():
-        charger_lon = charger['lon']
-        charger_lat = charger['lat']
-        
+        charger_lon = charger["lon"]
+        charger_lat = charger["lat"]
+
         # Calculate distance to all TEN-T points
         distances = haversine_distance_vectorized(
-            charger_lon, charger_lat,
-            tent_lons, tent_lats
+            charger_lon, charger_lat, tent_lons, tent_lats
         )
-        
+
         # Check if any distance is within threshold
         min_distance = distances.min()
         charger_near_tent.append(min_distance <= max_distance_km)
-    
+
     # Filter the dataframe
     filtered_df = chargers_df[charger_near_tent].copy()
-    
+
     return filtered_df
 
 
-def create_coverage_geojson(segments, high_power_chargers_df, max_distance_km=60):
+def create_coverage_geojson(
+    segments: list, high_power_chargers_df: pd.DataFrame, max_distance_km: float = 60
+) -> tuple[dict, dict]:
     """
     Create separate GeoJSON objects for covered (blue) and uncovered (red) segments.
-    
+
     Returns:
         Tuple of (covered_geojson, uncovered_geojson)
     """
     covered_features = []
     uncovered_features = []
-    
+
     for segment in segments:
-        is_covered = check_segment_coverage(segment, high_power_chargers_df, max_distance_km)
-        
+        is_covered = check_segment_coverage(
+            segment, high_power_chargers_df, max_distance_km
+        )
+
         feature = {
             "type": "Feature",
             "geometry": {
                 "type": "LineString",
-                "coordinates": segment["coords"]  # Already converted to plain Python floats
+                "coordinates": segment[
+                    "coords"
+                ],  # Already converted to plain Python floats
             },
-            "properties": {
-                "covered": bool(is_covered)
-            }
+            "properties": {"covered": bool(is_covered)},
         }
-        
+
         if is_covered:
             covered_features.append(feature)
         else:
             uncovered_features.append(feature)
-    
-    covered_geojson = {
-        "type": "FeatureCollection",
-        "features": covered_features
-    }
-    
-    uncovered_geojson = {
-        "type": "FeatureCollection",
-        "features": uncovered_features
-    }
-    
+
+    covered_geojson = {"type": "FeatureCollection", "features": covered_features}
+
+    uncovered_geojson = {"type": "FeatureCollection", "features": uncovered_features}
+
     return covered_geojson, uncovered_geojson
 
 
-
 def main():
-    """Main function to run the Streamlit application."""
+    """Main function to run the Streamlit application.
+
+    Args:
+        None
+
+    Returns:
+        None
+    """
     st.set_page_config(
         page_title=CONFIG["APP_TITLE"],
         layout="wide",
@@ -761,18 +820,20 @@ def main():
         st.divider()
 
         st.subheader("🛣️ TEN-T Core Network")
-        show_tent = st.checkbox("Show TEN-T core roads", value=True, help="EU core network roads")
-        
+        show_tent = st.checkbox(
+            "Show TEN-T core roads", value=True, help="EU core network roads"
+        )
+
         # Checkbox to filter chargers to only those near TEN-T
         show_only_tent_chargers = st.checkbox(
             "Show only ≥150kW chargers near TEN-T (≤3km)",
             value=False,
-            help="Filter map to only show high power chargers within 3km of TEN-T network"
+            help="Filter map to only show high power chargers within 3km of TEN-T network",
         )
-        
+
         # Placeholder for coverage stats (will be calculated and displayed later)
         coverage_stats_placeholder = st.empty()
-        
+
         if show_tent:
             st.caption(
                 """
@@ -852,23 +913,29 @@ def main():
                 )
 
     # --- APPLY TEN-T PROXIMITY FILTER ---
-    if show_only_tent_chargers and ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
+    if (
+        show_only_tent_chargers
+        and ev_station_df_filtered is not None
+        and not ev_station_df_filtered.empty
+    ):
         # Load TEN-T data and process segments
         ten_t_geojson_for_filter = load_tent_geojson(CONFIG["TEN_T_CORE_GEOJSON_PATH"])
         if ten_t_geojson_for_filter is not None:
-            road_segments_for_filter = process_tent_roads(ten_t_geojson_for_filter, segment_length_km=5.0)
-            
+            road_segments_for_filter = process_tent_roads(
+                ten_t_geojson_for_filter, segment_length_km=5.0
+            )
+
             # First, filter to only high power chargers (≥150kW)
             power_col = "Nennleistung Ladeeinrichtung [kW]"
             high_power_only = ev_station_df_filtered[
                 ev_station_df_filtered[power_col] >= 150
             ].copy()
-            
+
             # Then filter to only those within 3km of TEN-T
             ev_station_df_filtered = filter_chargers_near_tent(
                 high_power_only, road_segments_for_filter, max_distance_km=3.0
             )
-            
+
             # Show info in sidebar
             with st.sidebar:
                 st.caption(
@@ -879,42 +946,48 @@ def main():
     coverage_num_covered = 0
     coverage_total_segments = 0
     coverage_percentage = 0.0
-    
+
     ten_t_geojson_for_stats = load_tent_geojson(CONFIG["TEN_T_CORE_GEOJSON_PATH"])
     if show_tent and ten_t_geojson_for_stats is not None:
-        road_segments_for_stats = process_tent_roads(ten_t_geojson_for_stats, segment_length_km=5.0)
-        
+        road_segments_for_stats = process_tent_roads(
+            ten_t_geojson_for_stats, segment_length_km=5.0
+        )
+
         # Filter high-power chargers for coverage calculation
         if ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
             power_col = "Nennleistung Ladeeinrichtung [kW]"
             high_power_chargers_stats = ev_station_df_filtered[
                 ev_station_df_filtered[power_col] >= 150
             ].copy()
-            
+
             # Further filter to only chargers within 3km of TEN-T network
             high_power_chargers_stats = filter_chargers_near_tent(
                 high_power_chargers_stats, road_segments_for_stats, max_distance_km=3.0
             )
         else:
             high_power_chargers_stats = pd.DataFrame()
-        
+
         # Calculate coverage
         covered_geojson_stats, uncovered_geojson_stats = create_coverage_geojson(
             road_segments_for_stats, high_power_chargers_stats, max_distance_km=60
         )
-        
+
         coverage_num_covered = len(covered_geojson_stats["features"])
         coverage_num_uncovered = len(uncovered_geojson_stats["features"])
         coverage_total_segments = coverage_num_covered + coverage_num_uncovered
-        coverage_percentage = (coverage_num_covered / coverage_total_segments * 100) if coverage_total_segments > 0 else 0
-    
+        coverage_percentage = (
+            (coverage_num_covered / coverage_total_segments * 100)
+            if coverage_total_segments > 0
+            else 0
+        )
+
     # Display coverage in sidebar using the placeholder
     if show_tent and coverage_total_segments > 0:
         with coverage_stats_placeholder.container():
             st.metric(
                 label="🛣️ TEN-T Road Coverage",
                 value=f"{coverage_percentage:.1f}%",
-                help="Percentage of road segments with ≥150kW charger within 60km"
+                help="Percentage of road segments with ≥150kW charger within 60km",
             )
             st.caption(
                 f"**{coverage_num_covered:,}** of **{coverage_total_segments:,}** segments covered"
@@ -941,30 +1014,30 @@ def main():
 
     # --- CREATE TEN-T CORE NETWORK LAYER WITH COVERAGE ANALYSIS ---
     ten_t_geojson = load_tent_geojson(CONFIG["TEN_T_CORE_GEOJSON_PATH"])
-    
+
     if show_tent and ten_t_geojson is not None:
         # Pre-process TEN-T roads into segments (cached)
         road_segments = process_tent_roads(ten_t_geojson, segment_length_km=5.0)
-        
+
         # Filter high-power chargers based on selected year and power
         if ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
             power_col = "Nennleistung Ladeeinrichtung [kW]"
             high_power_chargers = ev_station_df_filtered[
                 ev_station_df_filtered[power_col] >= 150
             ].copy()
-            
+
             # Further filter to only chargers within 3km of TEN-T network
             high_power_chargers = filter_chargers_near_tent(
                 high_power_chargers, road_segments, max_distance_km=3.0
             )
         else:
             high_power_chargers = pd.DataFrame()
-        
+
         # Create coverage GeoJSON (covered in blue, uncovered in red)
         covered_geojson, uncovered_geojson = create_coverage_geojson(
             road_segments, high_power_chargers, max_distance_km=60
         )
-        
+
         # Create layer for covered segments (blue)
         if covered_geojson["features"]:
             covered_layer = pdk.Layer(
@@ -979,7 +1052,7 @@ def main():
                 auto_highlight=False,
             )
             layers.insert(0, covered_layer)
-        
+
         # Create layer for uncovered segments (red)
         if uncovered_geojson["features"]:
             uncovered_layer = pdk.Layer(
@@ -994,7 +1067,6 @@ def main():
                 auto_highlight=False,
             )
             layers.insert(0, uncovered_layer)
-
 
     # --- CREATE STATION LAYER ---
     if ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
