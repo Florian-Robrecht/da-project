@@ -15,7 +15,7 @@ from scipy.stats import linregress
 from datetime import datetime
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString
 from shapely.ops import substring
 import math
 
@@ -258,6 +258,57 @@ def check_segment_coverage(segment, high_power_chargers_df, max_distance_km=60):
     
     # Check if any charger is within range
     return (distances <= max_distance_km).any()
+
+
+def filter_chargers_near_tent(chargers_df, road_segments, max_distance_km=3.0):
+    """
+    Filter chargers to only include those within max_distance_km of the TEN-T network.
+    
+    Args:
+        chargers_df: DataFrame of chargers to filter
+        road_segments: List of road segment dictionaries from process_tent_roads
+        max_distance_km: Maximum distance in km to consider a charger near TEN-T
+        
+    Returns:
+        Filtered DataFrame containing only chargers near TEN-T network
+    """
+    if chargers_df.empty or not road_segments:
+        return chargers_df
+    
+    # Extract all points from road segments
+    tent_points = []
+    for segment in road_segments:
+        # Use midpoint of each segment for efficiency
+        tent_points.append(segment["midpoint"])
+    
+    if not tent_points:
+        return chargers_df
+    
+    # Convert to numpy arrays for vectorized operations
+    tent_lons = np.array([p[0] for p in tent_points])
+    tent_lats = np.array([p[1] for p in tent_points])
+    
+    # For each charger, find minimum distance to any TEN-T point
+    charger_near_tent = []
+    
+    for _, charger in chargers_df.iterrows():
+        charger_lon = charger['lon']
+        charger_lat = charger['lat']
+        
+        # Calculate distance to all TEN-T points
+        distances = haversine_distance_vectorized(
+            charger_lon, charger_lat,
+            tent_lons, tent_lats
+        )
+        
+        # Check if any distance is within threshold
+        min_distance = distances.min()
+        charger_near_tent.append(min_distance <= max_distance_km)
+    
+    # Filter the dataframe
+    filtered_df = chargers_df[charger_near_tent].copy()
+    
+    return filtered_df
 
 
 def create_coverage_geojson(segments, high_power_chargers_df, max_distance_km=60):
@@ -708,6 +759,13 @@ def main():
         st.subheader("🛣️ TEN-T Core Network")
         show_tent = st.checkbox("Show TEN-T core roads", value=True, help="EU core network roads")
         
+        # Checkbox to filter chargers to only those near TEN-T
+        show_only_tent_chargers = st.checkbox(
+            "Show only ≥150kW chargers near TEN-T (≤3km)",
+            value=False,
+            help="Filter map to only show high power chargers within 3km of TEN-T network"
+        )
+        
         # Placeholder for coverage stats (will be calculated and displayed later)
         coverage_stats_placeholder = st.empty()
         
@@ -718,6 +776,7 @@ def main():
                 - 🔵 Blue: Roads with ≥150kW charger within 60km
                 - 🔴 Red: Roads without coverage
                 
+                Only chargers ≥150kW within 3km of TEN-T network are considered.
                 Coverage updates based on the year filter.
                 """
             )
@@ -788,6 +847,30 @@ def main():
                     f"⚡ Power filter: {filtered_power_stations:,} stations visible"
                 )
 
+    # --- APPLY TEN-T PROXIMITY FILTER ---
+    if show_only_tent_chargers and ev_station_df_filtered is not None and not ev_station_df_filtered.empty:
+        # Load TEN-T data and process segments
+        ten_t_geojson_for_filter = load_tent_geojson(CONFIG["TEN_T_CORE_GEOJSON_PATH"])
+        if ten_t_geojson_for_filter is not None:
+            road_segments_for_filter = process_tent_roads(ten_t_geojson_for_filter, segment_length_km=5.0)
+            
+            # First, filter to only high power chargers (≥150kW)
+            power_col = "Nennleistung Ladeeinrichtung [kW]"
+            high_power_only = ev_station_df_filtered[
+                ev_station_df_filtered[power_col] >= 150
+            ].copy()
+            
+            # Then filter to only those within 3km of TEN-T
+            ev_station_df_filtered = filter_chargers_near_tent(
+                high_power_only, road_segments_for_filter, max_distance_km=3.0
+            )
+            
+            # Show info in sidebar
+            with st.sidebar:
+                st.caption(
+                    f"🛣️ TEN-T filter: {len(ev_station_df_filtered):,} chargers within 3km of TEN-T"
+                )
+
     # --- CALCULATE TEN-T COVERAGE STATISTICS FOR SIDEBAR ---
     coverage_num_covered = 0
     coverage_total_segments = 0
@@ -803,6 +886,11 @@ def main():
             high_power_chargers_stats = ev_station_df_filtered[
                 ev_station_df_filtered[power_col] >= 150
             ].copy()
+            
+            # Further filter to only chargers within 3km of TEN-T network
+            high_power_chargers_stats = filter_chargers_near_tent(
+                high_power_chargers_stats, road_segments_for_stats, max_distance_km=3.0
+            )
         else:
             high_power_chargers_stats = pd.DataFrame()
         
@@ -860,6 +948,11 @@ def main():
             high_power_chargers = ev_station_df_filtered[
                 ev_station_df_filtered[power_col] >= 150
             ].copy()
+            
+            # Further filter to only chargers within 3km of TEN-T network
+            high_power_chargers = filter_chargers_near_tent(
+                high_power_chargers, road_segments, max_distance_km=3.0
+            )
         else:
             high_power_chargers = pd.DataFrame()
         
