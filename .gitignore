@@ -2,3 +2,6 @@
 .venv/
 .streamlit/
 .python-version
+.cursor/
+__pycache__/
+.devcontainer/

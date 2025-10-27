@@ -4,7 +4,7 @@ A Streamlit web application to visualize train station accessibility in Germany 
 This app displays all train stations on an interactive map. Users can input
 an address to place a marker and zoom to its location.
 """
-
+import os 
 import streamlit as st
 import pydeck as pdk
 import pandas as pd
@@ -18,6 +18,10 @@ from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 from shapely.geometry import LineString
 from shapely.ops import substring
 import math
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # --- CONFIGURATION ---
 CONFIG = {
@@ -1046,7 +1050,7 @@ def main():
     }
 
     # Access Mapbox API key from Streamlit secrets
-    mapbox_api_key = st.secrets.get("MAPBOX_API_KEY")
+    mapbox_api_key = os.getenv("MAPBOX_API_KEY")
 
     st.pydeck_chart(
         pdk.Deck(
