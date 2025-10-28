@@ -447,32 +447,32 @@ def main():
 
     # --- CREATE INFO CARDS ---
     st.header("KPIs:")
-    # column1: EV Stations, column2: Registered EVs, column3: Registered EVs per public charger
+    # column1: Charging Points, column2: Registered EVs, column3: Registered EVs per public charging point
     col1, col2, col3 = st.columns(3)
     with col1:
         try:
-            num_chargers = ev_station_df_filtered["Anzahl Ladepunkte"].sum()
+            num_charging_points = ev_station_df_filtered["Anzahl Ladepunkte"].sum()
             # EV_CHARGER_DATASET_PUBLICATION - 1 year
             one_year_ago = CONFIG["EV_CHARGER_DATASET_PUBLICATION"].replace(
                 year=CONFIG["EV_CHARGER_DATASET_PUBLICATION"].year - 1
             )
-            num_chargers_one_year_ago = ev_station_df[
+            num_charging_points_one_year_ago = ev_station_df[
                 ev_station_df["Inbetriebnahmedatum"] <= one_year_ago
             ]["Anzahl Ladepunkte"].sum()
 
             # Show different label based on whether filtering is applied
             if selected_year and selected_year < max_year:
-                label = f"🔋 Public EV Chargers in Germany (up to {selected_year})"
+                label = f"🔋 Public Charging Points in Germany (up to {selected_year})"
             else:
-                label = "🔋 Public EV Chargers in Germany"
+                label = "🔋 Public Charging Points in Germany"
 
             st.metric(
                 label=label,
-                value=f"{num_chargers:,}",
-                delta=f"{round(((num_chargers/num_chargers_one_year_ago)-1)*100,2)}% YoY",
+                value=f"{num_charging_points:,}",
+                delta=f"{round(((num_charging_points/num_charging_points_one_year_ago)-1)*100,2)}% YoY",
             )
         except (FileNotFoundError, ValueError):
-            st.metric("🔋 Public EV Chargers in Germany", "Data not available")
+            st.metric("🔋 Public Charging Points in Germany", "Data not available")
     with col2:
         try:
             registered_evs = ev_registrations_df["Count"].sum()
@@ -495,12 +495,12 @@ def main():
     with col3:
         try:
             st.metric(
-                label="🔌 Registered EVs per public charger",
-                value=round(registered_evs / num_chargers, 2),
-                delta=f"{round(((registered_evs/num_chargers)/(registered_evs_one_year_ago/num_chargers_one_year_ago)-1)*100,2)}% YoY",
+                label="🔌 Registered EVs per public charging point",
+                value=round(registered_evs / num_charging_points, 2),
+                delta=f"{round(((registered_evs/num_charging_points)/(registered_evs_one_year_ago/num_charging_points_one_year_ago)-1)*100,2)}% YoY",
             )
         except (FileNotFoundError, pd.errors.ParserError):
-            st.metric("📍 Charging Stations", "Data not available")
+            st.metric("🔌 Registered EVs per public charging point", "Data not available")
 
     # --- BAR CHARTS ---
     st.header("Registrations:")
@@ -786,13 +786,13 @@ def main():
 
         # Power level filter checkboxes
         show_low_power = st.checkbox(
-            "Chargers < 50kW", value=True, help="Show low power chargers"
+            "Stations < 50kW", value=True, help="Show low power charging stations"
         )
         show_medium_power = st.checkbox(
-            "Chargers ≥ 50kW and < 150kW", value=True, help="Show medium power chargers"
+            "Stations ≥ 50kW and < 150kW", value=True, help="Show medium power charging stations"
         )
         show_high_power = st.checkbox(
-            "Chargers ≥ 150kW", value=True, help="Show high power chargers"
+            "Stations ≥ 150kW", value=True, help="Show high power charging stations"
         )
 
         # Show power distribution info
@@ -824,11 +824,11 @@ def main():
             "Show TEN-T core roads", value=True, help="EU core network roads"
         )
 
-        # Checkbox to filter chargers to only those near TEN-T
+        # Checkbox to filter charging stations to only those near TEN-T
         show_only_tent_chargers = st.checkbox(
-            "Show only ≥150kW chargers near TEN-T (≤3km)",
+            "Show only ≥150kW stations near TEN-T (≤3km)",
             value=False,
-            help="Filter map to only show high power chargers within 3km of TEN-T network",
+            help="Filter map to only show high power charging stations within 3km of TEN-T network",
         )
 
         # Placeholder for coverage stats (will be calculated and displayed later)
@@ -838,10 +838,10 @@ def main():
             st.caption(
                 """
                 **Coverage Analysis:**
-                - 🔵 Blue: Roads with ≥150kW charger within 60km
+                - 🔵 Blue: Roads with ≥150kW charging station within 60km
                 - 🔴 Red: Roads without coverage
                 
-                Only chargers ≥150kW within 3km of TEN-T network are considered.
+                Only charging stations ≥150kW within 3km of TEN-T network are considered.
                 Roads are analyzed in 2.5km segments for improved accuracy.
                 Coverage updates based on the year filter.
                 """
@@ -940,7 +940,7 @@ def main():
             # Show info in sidebar
             with st.sidebar:
                 st.caption(
-                    f"🛣️ TEN-T filter: {len(ev_station_df_filtered):,} chargers within 3km of TEN-T"
+                    f"🛣️ TEN-T filter: {len(ev_station_df_filtered):,} stations within 3km of TEN-T"
                 )
 
     # --- CALCULATE TEN-T COVERAGE STATISTICS FOR SIDEBAR ---
@@ -988,7 +988,7 @@ def main():
             st.metric(
                 label="🛣️ TEN-T Road Coverage",
                 value=f"{coverage_percentage:.1f}%",
-                help="Percentage of road segments with ≥150kW charger within 60km",
+                help="Percentage of road segments with ≥150kW charging station within 60km",
             )
             st.caption(
                 f"**{coverage_num_covered:,}** of **{coverage_total_segments:,}** segments covered"
@@ -1114,7 +1114,7 @@ def main():
     # --- RENDER MAP ---
     # Configure tooltip to show EV station details on hover
     tooltip = {
-        "html": "<b>{Betreiber}</b><br/>{Nennleistung Ladeeinrichtung [kW]}kW </b><br/> Chargers: {Anzahl Ladepunkte}",
+        "html": "<b>{Betreiber}</b><br/>{Nennleistung Ladeeinrichtung [kW]}kW </b><br/> Charging Points: {Anzahl Ladepunkte}",
         "style": {
             "backgroundColor": "steelblue",
             "color": "white",
