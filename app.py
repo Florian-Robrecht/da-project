@@ -495,12 +495,12 @@ def main():
     with col3:
         try:
             st.metric(
-                label="🔌 Registered EVs per public charging point",
+                label="🔌 Registered EVs & Plug-In hybrids per public charging point",
                 value=round(registered_evs / num_charging_points, 2),
                 delta=f"{round(((registered_evs/num_charging_points)/(registered_evs_one_year_ago/num_charging_points_one_year_ago)-1)*100,2)}% YoY",
             )
         except (FileNotFoundError, pd.errors.ParserError):
-            st.metric("🔌 Registered EVs per public charging point", "Data not available")
+            st.metric("🔌 Registered EVs & Plug-In hybrids per public charging point", "Data not available")
 
     # --- BAR CHARTS ---
     st.header("Registrations:")
@@ -679,25 +679,26 @@ def main():
 
                 if len(merged_monthly) > 1:
                     # Perform linear regression
+                    # Swapped: TotalNewEVs is now independent (X), NewChargingPoints is dependent (Y)
                     slope, intercept, r_value, p_value, std_err = linregress(
-                        merged_monthly["NewChargingPoints"],
                         merged_monthly["TotalNewEVs"],
+                        merged_monthly["NewChargingPoints"],
                     )
 
                     # Create regression line data
-                    x_line = np.array([0, merged_monthly["NewChargingPoints"].max()])
+                    x_line = np.array([0, merged_monthly["TotalNewEVs"].max()])
                     y_line = intercept + slope * x_line
 
                     # Create data for Altair chart
                     # Prepare scatter plot data
                     scatter_data = merged_monthly[
-                        ["NewChargingPoints", "TotalNewEVs"]
+                        ["TotalNewEVs", "NewChargingPoints"]
                     ].copy()
                     scatter_data.columns = ["x", "y"]
 
                     # Create regression line data
-                    x_min = merged_monthly["NewChargingPoints"].min()
-                    x_max = merged_monthly["NewChargingPoints"].max()
+                    x_min = merged_monthly["TotalNewEVs"].min()
+                    x_max = merged_monthly["TotalNewEVs"].max()
                     x_range = np.linspace(x_min, x_max, 50)
                     y_regression = intercept + slope * x_range
 
@@ -705,9 +706,9 @@ def main():
 
                     # Create base chart
                     base = alt.Chart(scatter_data).encode(
-                        x=alt.X("x:Q", title="New Charging Points per Month"),
+                        x=alt.X("x:Q", title="Total New EV + PHEV Registrations per Month"),
                         y=alt.Y(
-                            "y:Q", title="Total New EV + PHEV Registrations per Month"
+                            "y:Q", title="New Charging Points per Month"
                         ),
                     )
 
@@ -721,10 +722,10 @@ def main():
                         alt.Chart(line_data)
                         .mark_line(color="#ff7f0e", strokeWidth=3)
                         .encode(
-                            x=alt.X("x:Q", title="New Charging Points per Month"),
+                            x=alt.X("x:Q", title="Total New EV + PHEV Registrations per Month"),
                             y=alt.Y(
                                 "y:Q",
-                                title="Total New EV + PHEV Registrations per Month",
+                                title="New Charging Points per Month",
                             ),
                         )
                     )
